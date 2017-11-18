@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Hell Yeah</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+</head>
+<body>
+
+<div class="jumbotron text-center">
+  <h1><%= title %></h1>
+  <p>Using Golang and ExpressJs</p>
+</div>
+
+<div class="container">
+    <div class="panel panel-default">
+      <div class="panel-heading">Join The Chat</div>
+      <div class="panel-body">
+        <div class="form-group">
+          <textarea class="form-control" rows="10" id="messageArea" readonly="true"></textarea>
+        </div>
+        <div class="form-group">
+          <button type="submit" class="btn btn-default" id="btnSend" onclick="clearMessage()">Clear Message</button>
+        </div>
+        <div class="form-group">
+          <input type="text" class="form-control" id="message" onkeydown="userType()" onchange="sendMessage()">
+        </div>
+        <div class="form-group">
+          <button type="submit" class="btn btn-default" id="btnSend" onclick="sendMessage()">Send</button>
+        </div>
+    </div>
+  </div>
+
+  <script src="javascripts/ws.js"></script>
+</div>
+
+</body>
+</html>
