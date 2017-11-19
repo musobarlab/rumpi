@@ -16,7 +16,7 @@ type Message struct {
 	Content   string `json:"content,omitempty"`
 }
 
-type ClientModel struct{
+type ClientModel struct {
 	Username string `json:"username"`
 }
 
