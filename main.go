@@ -3,10 +3,11 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 
+	"github.com/gorilla/mux"
 	"github.com/gorilla/websocket"
-	"github.com/satori/go.uuid"
 )
 
 type Message struct {
@@ -15,11 +16,17 @@ type Message struct {
 	Content   string `json:"content,omitempty"`
 }
 
+type ClientModel struct{
+	Username string `json:"username"`
+}
+
 type Client struct {
 	id     string
 	socket *websocket.Conn
 	send   chan []byte
 }
+
+var registeredClients = make(map[string]*ClientModel)
 
 type ClientManager struct {
 	clients    map[*Client]bool
@@ -40,7 +47,6 @@ func (manager *ClientManager) start() {
 		select {
 		case conn := <-manager.register:
 			manager.clients[conn] = true
-      fmt.Println(conn)
 			jsonMessage, _ := json.Marshal(&Message{Sender: conn.id, Content: "has join the chat"})
 			manager.send(jsonMessage, conn)
 		case conn := <-manager.unregister:
@@ -107,13 +113,56 @@ func (c *Client) write() {
 	}
 }
 
-func wsPage(res http.ResponseWriter, req *http.Request) {
-	conn, error := (&websocket.Upgrader{CheckOrigin: func(r *http.Request) bool { return true }}).Upgrade(res, req, nil)
-	if error != nil {
+func indexHandler(res http.ResponseWriter, req *http.Request) {
+	if req.URL.Path != "/" {
 		http.NotFound(res, req)
 		return
 	}
-	client := &Client{id: uuid.NewV4().String(), socket: conn, send: make(chan []byte)}
+	fmt.Fprintf(res, "hell yeah!")
+}
+
+func registerHandler(res http.ResponseWriter, req *http.Request) {
+
+	res.Header().Set("Content-Type", "application/json")
+
+	var clientModel ClientModel
+	decoder := json.NewDecoder(req.Body)
+
+	err := decoder.Decode(&clientModel)
+
+	if err != nil {
+		http.Error(res, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	if _, ok := registeredClients[clientModel.Username]; ok {
+		http.Error(res, "Username already exist", http.StatusBadRequest)
+		return
+	}
+
+	registeredClients[clientModel.Username] = &clientModel
+
+	clientModelRes, err := json.Marshal(clientModel)
+
+	if err != nil {
+		http.Error(res, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	fmt.Fprintln(res, string(clientModelRes))
+}
+
+func websocketHandler(res http.ResponseWriter, req *http.Request) {
+	conn, err := (&websocket.Upgrader{CheckOrigin: func(r *http.Request) bool { return true }}).Upgrade(res, req, nil)
+	if err != nil {
+		http.NotFound(res, req)
+		return
+	}
+
+	id := req.Header.Get("Sec-Websocket-Key")
+	fmt.Println(id)
+
+	client := &Client{id: id, socket: conn, send: make(chan []byte)}
 
 	manager.register <- client
 
@@ -123,8 +172,13 @@ func wsPage(res http.ResponseWriter, req *http.Request) {
 
 func main() {
 	fmt.Println("Starting application...")
-  fmt.Println(manager.clients)
 	go manager.start()
-	http.HandleFunc("/ws", wsPage)
-	http.ListenAndServe(":9000", nil)
+
+	router := mux.NewRouter().StrictSlash(true)
+
+	router.HandleFunc("/", indexHandler).Methods("GET")
+	router.HandleFunc("/join", registerHandler).Methods("POST")
+	router.HandleFunc("/ws", websocketHandler)
+
+	log.Fatal(http.ListenAndServe(":9000", router))
 }

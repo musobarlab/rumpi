@@ -19,16 +19,22 @@
     <div class="panel panel-default">
       <div class="panel-heading">Join The Chat</div>
       <div class="panel-body">
-        <form action="/join" method="post">
-          <div class="form-group">
-            <input type="text" class="form-control" name="username">
-          </div>
-          <div class="form-group">
-            <button type="submit" class="btn btn-default" id="btnJoin">Join</button>
-          </div>
-        </form>
+        <div class="form-group">
+          <textarea class="form-control" rows="10" id="messageArea" readonly="true"></textarea>
+        </div>
+        <div class="form-group">
+          <button type="submit" class="btn btn-default" id="btnSend" onclick="clearMessage()">Clear Message</button>
+        </div>
+        <div class="form-group">
+          <input type="text" class="form-control" id="message" onkeydown="userType()" onchange="sendMessage()">
+        </div>
+        <div class="form-group">
+          <button type="submit" class="btn btn-default" id="btnSend" onclick="sendMessage()">Send</button>
+        </div>
     </div>
   </div>
+
+  <script src="javascripts/ws.js"></script>
 </div>
 
 </body>
