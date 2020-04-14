@@ -14,13 +14,13 @@ ws.onopen = function() {
 ws.onmessage = function (event){
   var messageData = event.data;
   var message = JSON.parse(messageData);
-  messageFmt = message.sender +" : "+message.content+"\n"
-  messageArea.value += messageFmt
+  messageFmt = message.sender +" : "+message.content+"\n";
+  messageArea.value += messageFmt;
 };
 
 ws.onclose = function() {
   // websocket is closed.
-  console.log("Connection is closed...")
+  console.log("Connection is closed...");
 };
 
 window.onbeforeunload = function(event) {
@@ -31,16 +31,21 @@ function userType() {
   if(!inputMessage.validity.valueMissing) {
     buttonSend.disabled = false;
   } else {
-    buttonSend.disabled = true
+    buttonSend.disabled = true;
   }
 }
 
 function sendMessage() {
-  var msg = inputMessage.value;
-  ws.send(msg)
-  inputMessage.value = ""
+  var content = inputMessage.value;
+  var msg = {
+    sender: "",
+    recipient: "",
+    content: content
+  }
+  ws.send(JSON.stringify(msg));
+  inputMessage.value = "";
 }
 
 function clearMessage() {
-  messageArea.value = ""
+  messageArea.value = "";
 }
