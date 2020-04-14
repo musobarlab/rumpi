@@ -46,12 +46,22 @@ func (manager *Manager) Run() {
 	for {
 		select {
 		case client := <-manager.Register:
-			message := &Message{From: client.ID, MessageType: Broadcast, Date: time.Now(), Content: "has join the chat"}
+			message := &Message{
+				From:        client.ID,
+				MessageType: Broadcast,
+				Date:        time.Now(),
+				Content:     "has join the chat",
+			}
 			manager.send(message, client)
 			manager.AddClient(client, true)
 		case client := <-manager.Unregister:
 			if _, ok := manager.Clients[client]; ok {
-				message := &Message{From: client.ID, MessageType: Broadcast, Date: time.Now(), Content: "has leave the chat"}
+				message := &Message{
+					From:        client.ID,
+					MessageType: Broadcast,
+					Date:        time.Now(),
+					Content:     "has leave the chat",
+				}
 				manager.send(message, client)
 				manager.DeleteClient(client)
 			}
@@ -99,6 +109,8 @@ func (manager *Manager) sendPrivate(message *Message) {
 
 //AddClient function will push new client to the map clients
 func (p *Manager) AddClient(key *Client, b bool) {
+
+	// add default room with its ID
 	key.AddRoom(key.ID)
 
 	p.Lock()
