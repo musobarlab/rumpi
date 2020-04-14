@@ -1,8 +1,10 @@
-# Realtime Random Chat: Server Side
+# Realtime Random Chat
 
-- Go
-- gorilla websocket
-- glide
+## Server Side
+Server side uses Go and Gorrilla
+
+## Client Side
+Client side uses NodeJs and Express
 
 # Running Server
 
