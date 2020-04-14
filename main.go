@@ -171,7 +171,7 @@ func websocketHandler(res http.ResponseWriter, req *http.Request) {
 }
 
 func main() {
-	fmt.Println("Starting application...")
+	fmt.Println("starting application...")
 	go manager.start()
 
 	router := mux.NewRouter().StrictSlash(true)
@@ -180,5 +180,6 @@ func main() {
 	router.HandleFunc("/join", registerHandler).Methods("POST")
 	router.HandleFunc("/ws", websocketHandler)
 
+	fmt.Println("server running on port 9000")
 	log.Fatal(http.ListenAndServe(":9000", router))
 }
