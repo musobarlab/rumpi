@@ -1,6 +1,7 @@
 var inputMessage = document.getElementById("message");
 var buttonSend = document.getElementById("btnSend");
 var messageArea = document.getElementById("messageArea");
+var to = document.getElementById("to");
 
 buttonSend.disabled = true;
 
@@ -14,7 +15,9 @@ ws.onopen = function() {
 ws.onmessage = function (event){
   var messageData = event.data;
   var message = JSON.parse(messageData);
-  messageFmt = message.sender +" : "+message.content+"\n";
+  console.log(message);
+
+  messageFmt = message.from +" : "+message.content+"\n";
   messageArea.value += messageFmt;
 };
 
@@ -37,9 +40,19 @@ function userType() {
 
 function sendMessage() {
   var content = inputMessage.value;
+
+  var toUser = "";
+  var messageType = "broadcast";
+  
+  if (to.value != "") {
+    toUser = to.value;
+    messageType = "privateMessage"
+  }
+
   var msg = {
-    sender: "",
-    recipient: "",
+    from: "",
+    to: toUser,
+    messageType: messageType,
     content: content
   }
   ws.send(JSON.stringify(msg));

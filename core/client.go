@@ -2,6 +2,8 @@ package core
 
 import (
 	"encoding/json"
+	"sync"
+	"time"
 
 	"github.com/gorilla/websocket"
 )
@@ -16,6 +18,22 @@ type Client struct {
 	Conn    *websocket.Conn
 	MsgChan chan []byte
 	Manager *Manager
+	Room    map[string]bool
+	sync.RWMutex
+}
+
+//AddRoom function will push new room to the map rooms
+func (client *Client) AddRoom(key string) {
+	client.Lock()
+	client.Room[key] = true
+	client.Unlock()
+}
+
+//DeleteRoom function will delete room by specific key from map rooms
+func (client *Client) DeleteRoom(key string) {
+	client.Lock()
+	delete(client.Room, key)
+	client.Unlock()
 }
 
 // Read function will read incoming message from client
@@ -45,10 +63,11 @@ func (c *Client) Read() {
 			break
 		}
 
-		message.Sender = c.ID
+		message.From = c.ID
+		message.Date = time.Now()
 
-		// send broadcast
-		c.Manager.BroadCast <- &message
+		// send message to Manager's IncomingMessage
+		c.Manager.IncomingMessage <- &message
 
 	}
 

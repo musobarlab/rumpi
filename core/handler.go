@@ -25,6 +25,7 @@ func (h *Handler) WsHandler(res http.ResponseWriter, req *http.Request) {
 	client.ID = id
 	client.Conn = sock
 	client.MsgChan = make(chan []byte)
+	client.Room = make(map[string]bool)
 	client.Manager = h.Manager
 
 	h.Manager.Register <- &client
