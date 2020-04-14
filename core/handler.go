@@ -6,7 +6,7 @@ import (
 	"net/http"
 )
 
-// Handler model
+// Handler struct
 type Handler struct {
 	Manager *Manager
 }

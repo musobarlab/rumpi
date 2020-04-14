@@ -3,10 +3,10 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 
-	"github.com/gorilla/mux"
+	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 	"github.com/musobarlab/go-websocket-chat/core"
 )
 
@@ -53,17 +53,36 @@ func main() {
 	fmt.Println("starting application...")
 	manager := core.NewManager()
 
-	wsHandler := core.Handler{Manager: manager}
+	// wsHandler := core.Handler{Manager: manager}
 
-	router := mux.NewRouter().StrictSlash(true)
+	// router := mux.NewRouter().StrictSlash(true)
 
-	router.HandleFunc("/", indexHandler).Methods("GET")
-	router.HandleFunc("/join", registerHandler).Methods("POST")
-	router.HandleFunc("/ws", wsHandler.WsHandler)
+	// router.HandleFunc("/", indexHandler).Methods("GET")
+	// router.HandleFunc("/join", registerHandler).Methods("POST")
+	// router.HandleFunc("/ws", wsHandler.WsHandler)
 
-	// start client manager
+	// // start client manager
+	// go manager.Run()
+
+	// fmt.Println("server running on port 9000")
+	// log.Fatal(http.ListenAndServe(":9000", router))
+
+	//---------------------------- echo ---------------
+	wsHandler := core.EchoHandler{Manager: manager}
+
+	e := echo.New()
+	e.Use(middleware.Logger())
+	e.GET("/", func(c echo.Context) error {
+		return c.String(http.StatusOK, "hell yeah")
+	})
+
+	e.POST("/join", func(c echo.Context) error {
+		return c.String(http.StatusOK, "success")
+	})
+
+	e.GET("/ws", wsHandler.WsHandler())
+
 	go manager.Run()
 
-	fmt.Println("server running on port 9000")
-	log.Fatal(http.ListenAndServe(":9000", router))
+	e.Logger.Fatal(e.Start(":9000"))
 }
