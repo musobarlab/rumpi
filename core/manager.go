@@ -59,7 +59,7 @@ func (manager *Manager) Run() {
 
 			switch m.MessageType {
 			case PrivateMessage:
-				//messageByte, _ := json.Marshal(m)
+				// send to specific user
 				manager.sendPrivate(m)
 			case Broadcast:
 				// send to every client that is currently connected
