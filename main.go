@@ -51,7 +51,7 @@ func registerHandler(res http.ResponseWriter, req *http.Request) {
 
 func main() {
 	fmt.Println("starting application...")
-	manager := core.NewManager()
+	manager := core.NewManager("555abcd")
 
 	// wsHandler := core.Handler{Manager: manager}
 
