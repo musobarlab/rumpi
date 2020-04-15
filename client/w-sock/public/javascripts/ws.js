@@ -12,6 +12,9 @@ var ws = new WebSocket("ws://192.168.100.15:9000/ws");
 
 ws.onopen = function() {
   console.log("socket opened..");
+
+  // when success upgrade connection
+  // then send auth and user information
   var msg = {
     username: username.value,
     messageType: "authMessage",
@@ -34,8 +37,12 @@ ws.onmessage = function (event){
 
 ws.onclose = function() {
   // websocket is closed.
-  console.log("Connection is closed...");
+  console.log("connection is closed... ", event);
 };
+
+ws.onerror = function (event){
+  console.log('connection error... ', event)
+}
 
 window.onbeforeunload = function(event) {
   socket.close();

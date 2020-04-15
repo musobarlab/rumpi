@@ -54,6 +54,10 @@ func (manager *Manager) Run() {
 	for {
 		select {
 		case client := <-manager.AuthSuccess:
+
+			// create room for client using its username
+			client.AddRoom(client.Username)
+
 			message := &Message{
 				From:        client.Username,
 				MessageType: Broadcast,
@@ -79,7 +83,7 @@ func (manager *Manager) Run() {
 
 		case m := <-manager.IncomingMessage:
 			for client := range manager.Clients {
-				fmt.Println(client.Username)
+				fmt.Println(client)
 			}
 
 			switch m.MessageType {
@@ -125,10 +129,6 @@ func (manager *Manager) sendPrivate(message *Message) {
 
 //AddClient function will push new client to the map clients
 func (p *Manager) AddClient(key *Client, b bool) {
-
-	// add default room with its ID
-	key.AddRoom(key.ID)
-
 	p.Lock()
 	p.Clients[key] = b
 	p.Unlock()

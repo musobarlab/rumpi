@@ -24,10 +24,6 @@ const (
 	MaxMessageSize = 1024
 )
 
-type ClientModel struct {
-	Username string `json:"username"`
-}
-
 // Client model
 type Client struct {
 	ID       string
