@@ -30,9 +30,9 @@ func (h *Handler) WsHandler(res http.ResponseWriter, req *http.Request) {
 
 	h.Manager.Register <- &client
 
-	// Read message
-	go client.Read()
+	// Consume message
+	go client.Consume()
 
-	// Write message
-	go client.Write()
+	// Publish message
+	go client.Publish()
 }

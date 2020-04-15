@@ -1,8 +1,6 @@
 package core
 
 import (
-	"fmt"
-
 	"github.com/labstack/echo/v4"
 )
 
@@ -19,7 +17,6 @@ func (h *EchoHandler) WsHandler() func(c echo.Context) error {
 		}
 
 		id := c.Request().Header.Get("Sec-Websocket-Key")
-		fmt.Println(id)
 
 		var client Client
 		client.ID = id
@@ -30,11 +27,11 @@ func (h *EchoHandler) WsHandler() func(c echo.Context) error {
 
 		h.Manager.Register <- &client
 
-		// Read message
-		go client.Read()
+		// Consume message
+		go client.Consume()
 
-		// Write message
-		go client.Write()
+		// Publish message
+		go client.Publish()
 
 		return nil
 	}

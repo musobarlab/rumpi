@@ -2,10 +2,26 @@ package core
 
 import (
 	"encoding/json"
+	"fmt"
 	"sync"
 	"time"
 
 	"github.com/gorilla/websocket"
+)
+
+const (
+
+	// WriteWait Time allowed to write a message to the peer.
+	WriteWait = 10 * time.Second
+
+	// PongWait Time allowed to read the next pong message from the peer.
+	PongWait = 60 * time.Second
+
+	// PongPeriod should less than PongWait
+	PingPeriod = (PongWait * 9) / 10
+
+	// Maximum message size allowed from peer.
+	MaxMessageSize = 1024
 )
 
 type ClientModel struct {
@@ -14,11 +30,13 @@ type ClientModel struct {
 
 // Client model
 type Client struct {
-	ID      string
-	Conn    *websocket.Conn
-	MsgChan chan []byte
-	Manager *Manager
-	Room    map[string]bool
+	ID       string
+	Username string
+	Conn     *websocket.Conn
+	MsgChan  chan []byte
+	Manager  *Manager
+	Room     map[string]bool
+	IsOnline bool
 	sync.RWMutex
 }
 
@@ -36,8 +54,8 @@ func (client *Client) DeleteRoom(key string) {
 	client.Unlock()
 }
 
-// Read function will read incoming message from client
-func (c *Client) Read() {
+// Consume function will read incoming message from client
+func (c *Client) Consume() {
 
 	// if function finish, remove client
 	// and also close connection
@@ -46,10 +64,18 @@ func (c *Client) Read() {
 		c.Conn.Close()
 	}()
 
+	c.Conn.SetReadLimit(MaxMessageSize)
+	c.Conn.SetReadDeadline(time.Now().Add(PongWait))
+	c.Conn.SetPongHandler(func(string) error {
+		c.Conn.SetReadDeadline(time.Now().Add(PongWait))
+		return nil
+	})
+
 	for {
 		// read message from client
 		_, msg, err := c.Conn.ReadMessage()
 		if err != nil {
+
 			c.Manager.Unregister <- c
 			c.Conn.Close()
 			break
@@ -58,12 +84,28 @@ func (c *Client) Read() {
 		var message Message
 		err = json.Unmarshal(msg, &message)
 		if err != nil {
+			fmt.Println(err)
 			c.Manager.Unregister <- c
 			c.Conn.Close()
 			break
 		}
 
-		message.From = c.ID
+		if message.MessageType == AuthMessage {
+			if message.AuthKey != c.Manager.AuthKey {
+				// auth is invalid, then remove the client that match with its ID
+				c.Conn.Close()
+				c.Manager.DeleteClient(c)
+			} else {
+				// auth success, send information to AuthSuccess's Manager
+				c.IsOnline = true
+				if message.Username != "" {
+					c.Username = message.Username
+				}
+				c.Manager.AuthSuccess <- c
+			}
+		}
+
+		message.From = c.Username
 		message.Date = time.Now()
 
 		// send message to Manager's IncomingMessage
@@ -73,25 +115,55 @@ func (c *Client) Read() {
 
 }
 
-// Write function will write message to connected client
-func (c *Client) Write() {
+// Publish function will write message to connected client
+func (c *Client) Publish() {
+
+	ticker := time.NewTicker(PingPeriod)
 
 	defer func() {
+		ticker.Stop()
 		c.Conn.Close()
 	}()
 
 	for {
 		select {
 		case msg, ok := <-c.MsgChan:
+			c.Conn.SetWriteDeadline(time.Now().Add(WriteWait))
 			if !ok {
 				// manager closed the send channel.
 				c.Conn.WriteMessage(websocket.CloseMessage, []byte{})
+				return
 			}
 
 			// write message to connected client
-			err := c.Conn.WriteMessage(websocket.TextMessage, msg)
+			// err := c.Conn.WriteMessage(websocket.TextMessage, msg)
+			// if err != nil {
+			// 	c.Conn.Close()
+			// }
+
+			writer, err := c.Conn.NextWriter(websocket.TextMessage)
 			if err != nil {
-				c.Conn.Close()
+				return
+			}
+
+			writer.Write(msg)
+
+			// Add queued chat messages to the current websocket message.
+			n := len(c.MsgChan)
+			for i := 0; i < n; i++ {
+				writer.Write([]byte{'\n'})
+				writer.Write(<-c.MsgChan)
+			}
+
+			err = writer.Close()
+			if err != nil {
+				return
+			}
+
+		case <-ticker.C:
+			c.Conn.SetWriteDeadline(time.Now().Add(WriteWait))
+			if err := c.Conn.WriteMessage(websocket.PingMessage, nil); err != nil {
+				return
 			}
 		}
 	}
