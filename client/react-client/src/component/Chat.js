@@ -1,7 +1,6 @@
 import React, {Component} from 'react';
 import {Button,
   ListGroup,
-  ListGroupItem,
   Jumbotron, 
   Container, 
   Row, 
@@ -21,8 +20,9 @@ class Chat extends Component {
       ws: null,
       redirect: false,
       message: '',
+      messages: [],
       to: '',
-      messages: []
+      onlineUsers: []
     };
 
     this._handleChange = this._handleChange.bind(this);
@@ -42,7 +42,7 @@ class Chat extends Component {
 
   _connect() {
     const username = localStorage.getItem('username');
-    let ws = new WebSocket('ws://192.168.100.15:9000/ws');
+    let ws = new WebSocket(this.props.socketUrl);
 
     ws.onopen = () => {
         console.log("socket opened..");
@@ -51,8 +51,8 @@ class Chat extends Component {
         // then send auth and user information
         let msg = {
             username: username,
-            messageType: "authMessage",
-            authKey: "555abcd"
+            messageType: 'authMessage',
+            authKey: this.props.authKey
         }
 
         ws.send(JSON.stringify(msg));
@@ -72,9 +72,16 @@ class Chat extends Component {
     ws.onmessage = (e) => {
         let messageData = e.data;
         let message = JSON.parse(messageData);
-        let {messages} = this.state;
-        messages.push(message);
-        this.setState({messages: messages});
+        if (message.messageType === 'usersStatus') {
+          let {onlineUsers} = this.state;
+          console.log(message.onlineUsers);
+          onlineUsers = message.onlineUsers;
+          this.setState({onlineUsers: onlineUsers});
+        } else {
+          let {messages} = this.state;
+          messages.push(message);
+          this.setState({messages: messages});
+        }
     }
   }
 
@@ -129,7 +136,14 @@ class Chat extends Component {
         <Container>
           <Row>
             <Col sm={4}>
-            <h3>People</h3>
+              <h3>People</h3>
+              <ListGroup variant="flush">
+                {
+                  this.state.onlineUsers.map((user, index) => {
+                  return <ListGroup.Item key={index}>{user.username}: {(user.status ? 'online' : 'offline')}</ListGroup.Item>
+                  })
+                }
+              </ListGroup>
             </Col>
             <Col sm={8}>
               <h3>Messages</h3>
@@ -137,14 +151,13 @@ class Chat extends Component {
                 <FormControl name="to" placeholder="to" aria-label="to" value={this.state.to} onChange={this._handleChange}/>
                 <FormControl name="message" placeholder="message" aria-label="message" value={this.state.message} onChange={this._handleChange}/>
                 <InputGroup.Append>
-                  <Button variant="outline-secondary" onClick={this._handleSendMessage}>Send</Button>
+                  <Button variant="outline-secondary" onClick={this._handleSendMessage} disabled={!this.state.message}>Send</Button>
                 </InputGroup.Append>
               </InputGroup>
               <ListGroup variant="flush">
                 {
                   this.state.messages.map((message, index) => {
-                    console.log(message.from);
-                  return <ListGroup.Item>{message.from}: {message.content}</ListGroup.Item>
+                  return <ListGroup.Item key={index}>{message.from}: {message.content}</ListGroup.Item>
                   })
                 }
               </ListGroup>

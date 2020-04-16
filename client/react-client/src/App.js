@@ -3,7 +3,6 @@ import {Chat, Login} from './component';
 import {Switch, Route, BrowserRouter} from 'react-router-dom';
 
 class App extends Component {
-
   render() {
     return (
       <BrowserRouter>
@@ -13,7 +12,7 @@ class App extends Component {
               <Login/>
             </Route>
             <Route path='/chat'>
-              <Chat/>
+              <Chat socketUrl={this.props.socketUrl} authKey={this.props.authKey}/>
             </Route>
           </Switch>
         </div>
@@ -22,5 +21,9 @@ class App extends Component {
     );
   }
 }
+
+App.defaultProps = {
+  socketUrl: 'ws://localhost:9000/ws'
+};
 
 export default App;

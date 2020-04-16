@@ -10,6 +10,11 @@ import (
 	"github.com/gorilla/websocket"
 )
 
+const (
+	// UpdateStatusWait to update users status
+	UpdateStatusWait = 2 * time.Second
+)
+
 // Manager model
 type Manager struct {
 	AuthKey         string
@@ -51,6 +56,12 @@ func NewManager(authKey string) *Manager {
 
 // Run function will run Manager process
 func (manager *Manager) Run() {
+	ticker := time.NewTicker(PingPeriod)
+
+	defer func() {
+		ticker.Stop()
+	}()
+
 	for {
 		select {
 		case client := <-manager.AuthSuccess:
@@ -99,6 +110,17 @@ func (manager *Manager) Run() {
 				// send to every client that is currently connected
 				manager.send(m, nil)
 			}
+		case <-ticker.C:
+			var users []*OnlineUser
+			for k, _ := range manager.Clients {
+				users = append(users, &OnlineUser{Username: k.Username, Status: k.IsOnline})
+			}
+			msg := Message{
+				MessageType: UsersStatus,
+				OnlineUsers: users,
+			}
+
+			manager.send(&msg, nil)
 		}
 	}
 }
