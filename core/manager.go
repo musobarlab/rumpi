@@ -70,6 +70,10 @@ func (manager *Manager) Run() {
 			manager.AddClient(client, true)
 
 		case client := <-manager.Unregister:
+
+			// set client online status to false
+			client.IsOnline = false
+
 			if _, ok := manager.Clients[client]; ok {
 				message := &Message{
 					From:        client.Username,
