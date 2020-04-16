@@ -1,14 +1,14 @@
 import React, {Component} from 'react';
 import {Button,
   ListGroup,
-  Jumbotron, 
   Container, 
-  Row, 
+  Row,
   Col, 
   InputGroup, 
   FormControl} from 'react-bootstrap';
 
 import {Redirect} from 'react-router-dom';
+import Header from './Header';
 
 class Chat extends Component {
 
@@ -125,14 +125,7 @@ class Chat extends Component {
 
     return (
       <div>
-        <Jumbotron fluid>
-          <Container>
-            <h1>Random Chat Demo</h1>
-            <p>
-              Random Chat Demo Using Golang and React.
-            </p>
-          </Container>
-        </Jumbotron>
+        <Header disabledLogout={true}/>
         <Container>
           <Row>
             <Col sm={4}>

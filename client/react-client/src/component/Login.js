@@ -1,11 +1,11 @@
 import React, {Component} from 'react';
 import {Button, 
-  Jumbotron, 
-  Container, 
+  Container,
   InputGroup, 
   FormControl} from 'react-bootstrap';
 
 import {Redirect} from 'react-router-dom';
+import Header from './Header';
 
 class Login extends Component {
 
@@ -43,19 +43,12 @@ class Login extends Component {
 
     return (
       <div>
-        <Jumbotron fluid>
-          <Container>
-            <h1>Random Chat Demo</h1>
-            <p>
-              Random Chat Demo Using Golang and React.
-            </p>
-          </Container>
-        </Jumbotron>
+        <Header disabledLogout={true}/>
         <Container>
             <InputGroup className="mb-3">
                 <FormControl id="username" placeholder="username" aria-label="username" value={this.state.username} onChange={this._handleChange}/>
                 <InputGroup.Append>
-                    <Button variant="outline-secondary" onClick={this._handleLogin}>Login</Button>
+                    <Button variant="outline-secondary" onClick={this._handleLogin} disabled={!this.state.username}>Login</Button>
                 </InputGroup.Append>
             </InputGroup>
         </Container>
