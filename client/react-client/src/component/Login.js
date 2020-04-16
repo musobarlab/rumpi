@@ -43,7 +43,7 @@ class Login extends Component {
 
     return (
       <div>
-        <Header disabledLogout={true}/>
+        <Header disabledLogout={this.props.disabledLogout}/>
         <Container>
             <InputGroup className="mb-3">
                 <FormControl id="username" placeholder="username" aria-label="username" value={this.state.username} onChange={this._handleChange}/>

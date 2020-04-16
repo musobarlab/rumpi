@@ -125,7 +125,7 @@ class Chat extends Component {
 
     return (
       <div>
-        <Header disabledLogout={true}/>
+        <Header disabledLogout={this.props.disabledLogout}/>
         <Container>
           <Row>
             <Col sm={4}>
