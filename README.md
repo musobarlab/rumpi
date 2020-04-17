@@ -11,7 +11,7 @@ Client side uses NodeJs and Express
 ```shell
 $ go build
 
-$ ./go-websocket-chat
+$ ./rumpi
 ```
 
 # Running Client

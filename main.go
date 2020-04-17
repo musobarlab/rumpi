@@ -6,7 +6,7 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
-	"github.com/musobarlab/go-websocket-chat/core"
+	"github.com/musobarlab/rumpi/core"
 )
 
 func indexHandler(res http.ResponseWriter, req *http.Request) {

@@ -1,4 +1,4 @@
-module github.com/musobarlab/go-websocket-chat
+module github.com/musobarlab/rumpi
 
 go 1.12
 
