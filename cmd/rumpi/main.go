@@ -3,10 +3,12 @@ package main
 import (
 	"fmt"
 	"net/http"
+	"os"
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
-	"github.com/musobarlab/rumpi/core"
+	"github.com/musobarlab/rumpi/config"
+	"github.com/musobarlab/rumpi/pkg/chathub"
 )
 
 func indexHandler(res http.ResponseWriter, req *http.Request) {
@@ -18,10 +20,17 @@ func indexHandler(res http.ResponseWriter, req *http.Request) {
 }
 
 func main() {
-	fmt.Println("starting application...")
-	manager := core.NewManager("555abcd")
 
-	// wsHandler := core.Handler{Manager: manager}
+	err := config.LoadEnv()
+	if err != nil {
+		fmt.Println(err.Error())
+		os.Exit(1)
+	}
+
+	fmt.Println("starting application...")
+	manager := chathub.NewManager(config.Env.WebsocketKey)
+
+	// wsHandler := chathub.Handler{Manager: manager}
 
 	// router := mux.NewRouter().StrictSlash(true)
 
@@ -35,7 +44,7 @@ func main() {
 	// log.Fatal(http.ListenAndServe(":9000", router))
 
 	//---------------------------- echo ---------------
-	wsHandler := core.EchoHandler{Manager: manager}
+	wsHandler := chathub.EchoHandler{Manager: manager}
 
 	e := echo.New()
 	e.Use(middleware.Logger())
@@ -51,5 +60,5 @@ func main() {
 
 	go manager.Run()
 
-	e.Logger.Fatal(e.Start(":9000"))
+	e.Logger.Fatal(e.Start(fmt.Sprintf(":%d", config.Env.HTTPPort)))
 }
