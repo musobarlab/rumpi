@@ -1,4 +1,4 @@
-package core
+package chathub
 
 import (
 	"time"

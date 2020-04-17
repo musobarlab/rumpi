@@ -1,4 +1,4 @@
-package core
+package chathub
 
 import (
 	"github.com/labstack/echo/v4"
