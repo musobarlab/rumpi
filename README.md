@@ -9,7 +9,7 @@ Client side uses NodeJs and Express
 # Running Server
 
 ```shell
-$ go build
+$ make build
 
 $ ./rumpi
 ```
