@@ -1,5 +1,8 @@
 # Opensource chat application scaffold for building chat application with Go and Reactjs
 
+# Note:
+This project still in active development
+
 ## Server Side
 Server side uses Go and Gorrilla
 
