@@ -32,9 +32,9 @@ class Header extends Component {
             <div>
                 <Jumbotron fluid>
                 <Container>
-                    <h1>Random Chat Demo</h1>
+                    <h1>Rumpi</h1>
                     <p>
-                    Random Chat Demo Using Golang and React.
+                    Opensource chat application scaffold for building chat application with Go and Reactjs
                     </p>
                 </Container>
                 </Jumbotron>

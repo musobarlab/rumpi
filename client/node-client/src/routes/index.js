@@ -5,7 +5,7 @@ const router = express.Router();
 const request = require('request');
 
 router.get('/', (req, res, next) => {
-  res.render('pages/index', {title: 'Random Chat Demo'});
+  res.render('pages/index', {title: 'Rumpi'});
 });
 
 router.post('/join', (req, res, next) => {
@@ -43,7 +43,7 @@ router.get('/chat', (req, res, next) => {
   if (username === undefined) {
     return res.redirect('/');
   }
-  res.render('pages/chat', {title: 'Random Chat Demo', username: username});
+  res.render('pages/chat', {title: 'Rumpi', username: username});
 });
 
 module.exports = router;
