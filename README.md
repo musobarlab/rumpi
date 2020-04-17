@@ -4,7 +4,7 @@
 Server side uses Go and Gorrilla
 
 ## Client Side
-Client side uses NodeJs and Express
+There are two client side applications you can choose, either Reactjs or Nodejs with express
 
 # Running Server
 
