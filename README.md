@@ -1,4 +1,4 @@
-# Realtime Random Chat
+# Opensource chat application scaffold for building chat application with Go and Reactjs
 
 ## Server Side
 Server side uses Go and Gorrilla
