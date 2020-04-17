@@ -56,7 +56,7 @@ func NewManager(authKey string) *Manager {
 
 // Run function will run Manager process
 func (manager *Manager) Run() {
-	ticker := time.NewTicker(PingPeriod)
+	ticker := time.NewTicker(UpdateStatusWait)
 
 	defer func() {
 		ticker.Stop()
