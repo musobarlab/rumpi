@@ -17,7 +17,7 @@ $ ./rumpi
 # Running Client
 
 ```shell
-$ cd client/w-sock
+$ cd client/node-client
 $ npm install
 $ npm start
 ```
