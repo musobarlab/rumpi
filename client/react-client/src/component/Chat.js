@@ -22,11 +22,13 @@ class Chat extends Component {
       message: '',
       messages: [],
       to: '',
-      onlineUsers: []
+      onlineUsers: [],
+      disabledLogout: false
     };
 
     this._handleChange = this._handleChange.bind(this);
     this._handleSendMessage = this._handleSendMessage.bind(this);
+    this._handleKeyEnter = this._handleKeyEnter.bind(this);
   }
 
   componentDidMount() {
@@ -38,6 +40,15 @@ class Chat extends Component {
       this._connect();
     }
     
+  }
+
+  componentWillUnmount() {
+    console.log('componen will unmount');
+    const {ws} = this.state;
+    if (ws != null) {
+      ws.close();
+    }
+    this.setState({disabledLogout: true});
   }
 
   _connect() {
@@ -94,6 +105,17 @@ class Chat extends Component {
   }
 
   _handleSendMessage() {
+    this._sendMessage();
+  }
+
+  _handleKeyEnter(e) {
+    const key = e.key;
+    if (key === 'Enter') {
+      this._sendMessage();
+    }
+  }
+
+  _sendMessage() {
     const {ws, message, to} = this.state;
     let toUser = '';
     let messageType = 'broadcast';
@@ -109,9 +131,11 @@ class Chat extends Component {
       content: message
     };
 
-    ws.send(JSON.stringify(msg));
-
-    this.setState({message: ''});
+    if (message !== '') {
+      
+      ws.send(JSON.stringify(msg));
+      this.setState({message: ''});
+    }
   }
 
   render() {
@@ -125,7 +149,7 @@ class Chat extends Component {
 
     return (
       <div>
-        <Header disabledLogout={this.props.disabledLogout}/>
+        <Header disabledLogout={this.state.disabledLogout}/>
         <Container>
           <Row>
             <Col sm={4}>
@@ -142,7 +166,8 @@ class Chat extends Component {
               <h3>Messages</h3>
               <InputGroup className="mb-3">
                 <FormControl name="to" placeholder="to" aria-label="to" value={this.state.to} onChange={this._handleChange}/>
-                <FormControl name="message" placeholder="message" aria-label="message" value={this.state.message} onChange={this._handleChange}/>
+                <FormControl name="message" placeholder="message" aria-label="message" 
+                  value={this.state.message} onChange={this._handleChange} onKeyPress={this._handleKeyEnter}/>
                 <InputGroup.Append>
                   <Button variant="outline-secondary" onClick={this._handleSendMessage} disabled={!this.state.message}>Send</Button>
                 </InputGroup.Append>

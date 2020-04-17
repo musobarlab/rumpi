@@ -12,23 +12,16 @@ class App extends Component {
     
   }
 
-  componentDidMount() {
-    const username = localStorage.getItem('username');
-    if (username == null) {
-      this.setState({disabledLogout: true});
-    }
-  }
-
   render() {
     return (
       <BrowserRouter>
         <div>
           <Switch>
             <Route exact path='/'>
-              <Login disabledLogout={this.state.disabledLogout}/>
+              <Login/>
             </Route>
             <Route path='/chat'>
-              <Chat socketUrl={this.props.socketUrl} authKey={this.props.authKey} disabledLogout={this.state.disabledLogout}/>
+              <Chat socketUrl={this.props.socketUrl} authKey={this.props.authKey}/>
             </Route>
           </Switch>
         </div>

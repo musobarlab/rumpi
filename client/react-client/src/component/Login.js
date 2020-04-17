@@ -15,11 +15,19 @@ class Login extends Component {
 
     this.state = {
       username: '',
-      redirect: false
+      redirect: false,
+      disabledLogout: false
     };
 
     this._handleChange = this._handleChange.bind(this);
     this._handleLogin = this._handleLogin.bind(this);
+  }
+
+  componentDidMount() {
+    const username = localStorage.getItem('username');
+    if (username == null) {
+      this.setState({disabledLogout: true});
+    }
   }
 
   _handleLogin() {
@@ -43,7 +51,7 @@ class Login extends Component {
 
     return (
       <div>
-        <Header disabledLogout={this.props.disabledLogout}/>
+        <Header disabledLogout={this.state.disabledLogout}/>
         <Container>
             <InputGroup className="mb-3">
                 <FormControl id="username" placeholder="username" aria-label="username" value={this.state.username} onChange={this._handleChange}/>
