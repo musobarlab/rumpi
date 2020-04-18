@@ -121,7 +121,7 @@ class Register extends Component {
         <Container>
           <Form onSubmit={this._handleSubmit}>
             <Form.Text className="text-muted">
-            {this.state.messageRegister}
+                {this.state.messageRegister}
             </Form.Text>
 
             <Form.Group controlId="formFullname">
