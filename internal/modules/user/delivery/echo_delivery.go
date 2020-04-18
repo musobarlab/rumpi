@@ -1,7 +1,6 @@
 package delivery
 
 import (
-	"fmt"
 	"net/http"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -49,7 +48,6 @@ func (h *EchoDelivery) login(c echo.Context) error {
 	ctx := shared.SetToContext(c.Request().Context(), shared.ContextKey("ipAddress"), ipAddress)
 	loginResult := h.userUsecase.Login(ctx, &loginRequest)
 	if loginResult.Error != nil {
-		fmt.Println(loginResult.Error)
 		return shared.NewHTTPResponse(http.StatusUnauthorized, "invalid username or password").JSON(c.Response())
 	}
 
@@ -62,7 +60,6 @@ func (h *EchoDelivery) register(c echo.Context) error {
 
 	var userRequest domain.User
 	if err := c.Bind(&userRequest); err != nil {
-		fmt.Println(err)
 		return shared.NewHTTPResponse(http.StatusBadRequest, "invalid user payload").JSON(c.Response())
 	}
 

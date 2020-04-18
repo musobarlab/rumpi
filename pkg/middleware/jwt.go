@@ -1,7 +1,6 @@
 package middleware
 
 import (
-	"fmt"
 	"net/http"
 	"strings"
 
@@ -30,8 +29,6 @@ func (m *Middleware) ValidateJWT() echo.MiddlewareFunc {
 			if resp.Error != nil {
 				return shared.NewHTTPResponse(http.StatusUnauthorized, resp.Error.Error()).JSON(c.Response())
 			}
-
-			fmt.Println(resp.Data)
 
 			c.Set("jwtClaim", resp.Data)
 			return next(c)
