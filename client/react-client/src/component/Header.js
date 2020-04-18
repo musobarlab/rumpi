@@ -19,6 +19,8 @@ class Header extends Component {
 
     _logout() {
         localStorage.removeItem('username');
+        localStorage.removeItem('token');
+        localStorage.removeItem('expired');
         this.setState({redirect: true});
     }
 

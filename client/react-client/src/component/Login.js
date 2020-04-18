@@ -1,9 +1,10 @@
 import React, {Component} from 'react';
-import {Button, 
+import {
+  Button, 
   Container,
-  InputGroup, 
-  FormControl} from 'react-bootstrap';
+  Form} from 'react-bootstrap';
 
+import axios from 'axios';
 import {Redirect} from 'react-router-dom';
 import Header from './Header';
 
@@ -15,12 +16,14 @@ class Login extends Component {
 
     this.state = {
       username: '',
+      password: '',
       redirect: false,
-      disabledLogout: false
+      disabledLogout: false,
+      messageLogin: ''
     };
 
     this._handleChange = this._handleChange.bind(this);
-    this._handleLogin = this._handleLogin.bind(this);
+    this._handleSubmit = this._handleSubmit.bind(this);
   }
 
   componentDidMount() {
@@ -30,14 +33,59 @@ class Login extends Component {
     }
   }
 
-  _handleLogin() {
-    const {username} = this.state;
-    localStorage.setItem('username', username);
-    this.setState({redirect: true});
+  _handleSubmit(e) {
+
+    const {username, password} = this.state;
+
+    axios({
+      url: 'http://192.168.100.15:9000/users/login',
+      method: 'POST',
+      headers: { 
+        'content-type': 'application/json'
+      },
+      data: {
+        'username': username,
+        'password': password
+      },
+      auth: {
+        username: 'user',
+        password: '123456'
+      }
+    }).then((response) => {
+      let data = response.data;
+
+      if (response.status !== 200) {
+        let {messageLogin} = this.state;
+        messageLogin = data.message
+        this.setState({messageLogin: messageLogin});
+      } else {
+        localStorage.setItem('username', data.data.email.split('@')[0]);
+        localStorage.setItem('token', data.data.accessToken);
+        localStorage.setItem('expired', data.data.accessTokenExpired);
+        this.setState({username: '', password: '', redirect: true});
+      }
+    }).catch((err) => {
+      let data = err.response;
+      let {messageLogin} = this.state;
+      if (data.data) {
+        messageLogin = data.data.message;
+      } else {
+        messageLogin = 'please try again later';
+      }
+
+      this.setState({username: '', password: ''});
+      this.setState({messageLogin: messageLogin});
+    });
+
+    e.preventDefault();
   }
 
   _handleChange(e) {
-    this.setState({username: e.target.value});
+    const target = e.target;
+    const value = target.value;
+    const name = target.name;
+
+    this.setState({[name]: value});
   }
 
   render() {
@@ -53,12 +101,23 @@ class Login extends Component {
       <div>
         <Header disabledLogout={this.state.disabledLogout}/>
         <Container>
-            <InputGroup className="mb-3">
-                <FormControl id="username" placeholder="username" aria-label="username" value={this.state.username} onChange={this._handleChange}/>
-                <InputGroup.Append>
-                    <Button variant="outline-secondary" onClick={this._handleLogin} disabled={!this.state.username}>Login</Button>
-                </InputGroup.Append>
-            </InputGroup>
+          <Form onSubmit={this._handleSubmit}>
+            <Form.Text className="text-muted">
+            {this.state.messageLogin}
+            </Form.Text>
+            <Form.Group controlId="formBasicEmail">
+              <Form.Label>Email address</Form.Label>
+              <Form.Control name="username" type="email" placeholder="Enter email" value={this.state.username} onChange={this._handleChange} required={true}/>
+            </Form.Group>
+
+            <Form.Group controlId="formBasicPassword">
+              <Form.Label>Password</Form.Label>
+              <Form.Control name="password" type="password" placeholder="Password" value={this.state.password} onChange={this._handleChange} required={true}/>
+            </Form.Group>
+            <Button variant="outline-secondary" type="submit">
+              Login
+            </Button>
+          </Form>
         </Container>
       </div>
     );

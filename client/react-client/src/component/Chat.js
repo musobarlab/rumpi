@@ -53,6 +53,7 @@ class Chat extends Component {
 
   _connect() {
     const username = localStorage.getItem('username');
+    const token = localStorage.getItem('token');
     let ws = new WebSocket(this.props.socketUrl);
 
     ws.onopen = () => {
@@ -61,9 +62,10 @@ class Chat extends Component {
         // when success upgrade connection
         // then send auth and user information
         let msg = {
-            username: username,
             messageType: 'authMessage',
-            authKey: this.props.authKey
+            authKey: this.props.authKey,
+            username: username,
+            token: token
         }
 
         ws.send(JSON.stringify(msg));
@@ -157,7 +159,7 @@ class Chat extends Component {
               <ListGroup variant="flush">
                 {
                   this.state.onlineUsers.map((user, index) => {
-                  return <ListGroup.Item key={index}>{user.username}: {(user.status ? 'online' : 'offline')}</ListGroup.Item>
+                    return <ListGroup.Item key={index}>{user.username}: {(user.status ? 'online' : 'offline')}</ListGroup.Item>
                   })
                 }
               </ListGroup>
@@ -175,7 +177,7 @@ class Chat extends Component {
               <ListGroup variant="flush">
                 {
                   this.state.messages.map((message, index) => {
-                  return <ListGroup.Item key={index}>{message.from}: {message.content}</ListGroup.Item>
+                    return <ListGroup.Item key={index}>{message.from}: {message.content}</ListGroup.Item>
                   })
                 }
               </ListGroup>
