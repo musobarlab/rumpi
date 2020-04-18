@@ -1,12 +1,14 @@
 package chathub
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"sync"
 	"time"
 
 	"github.com/gorilla/websocket"
+	"github.com/musobarlab/rumpi/pkg/jwt"
 )
 
 const (
@@ -80,7 +82,6 @@ func (c *Client) Consume() {
 		var message Message
 		err = json.Unmarshal(msg, &message)
 		if err != nil {
-			fmt.Println(err)
 			c.Manager.Unregister <- c
 			c.Conn.Close()
 			break
@@ -92,12 +93,21 @@ func (c *Client) Consume() {
 				c.Conn.Close()
 				c.Manager.DeleteClient(c)
 			} else {
-				// auth success, send information to AuthSuccess's Manager
-				c.IsOnline = true
-				if message.Username != "" {
-					c.Username = message.Username
+				jwtClaimResult := c.Manager.JwtService.Validate(context.Background(), message.Token)
+				if jwtClaimResult.Error != nil {
+					c.Conn.Close()
+					c.Manager.DeleteClient(c)
+				} else {
+					jwtClaim := jwtClaimResult.Data.(*jwt.Claim)
+					fmt.Println("-------------------------")
+					fmt.Println(jwtClaim.User.Email)
+					// auth success, send information to AuthSuccess's Manager
+					c.IsOnline = true
+					if message.Username != "" {
+						c.Username = message.Username
+					}
+					c.Manager.AuthSuccess <- c
 				}
-				c.Manager.AuthSuccess <- c
 			}
 		}
 

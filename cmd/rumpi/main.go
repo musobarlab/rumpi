@@ -28,11 +28,12 @@ func main() {
 	}
 
 	fmt.Println("starting application...")
-	chatManager := chathub.NewManager(config.Config.WebsocketKey)
 
 	passwordHasher := p.NewPassword(sha1.New, 8, 32, int(config.Config.PasswordHashIteration))
 
 	jwtService := jwt.NewJWT(config.Config.PublicKey, config.Config.PrivateKey)
+
+	chatManager := chathub.NewManager(config.Config.WebsocketKey, jwtService)
 
 	// user module
 	inMemoryDB := make(map[primitive.ObjectID]*userDomain.User)

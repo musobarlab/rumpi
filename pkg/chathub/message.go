@@ -34,6 +34,7 @@ type OnlineUser struct {
 type Message struct {
 	MessageType MessageType   `json:"messageType,omitempty"`
 	AuthKey     string        `json:"authKey,omitempty"`
+	Token       string        `json:"token,omitempty"`
 	Username    string        `json:"username,omitempty"`
 	From        string        `json:"from,omitempty"`
 	To          string        `json:"to,omitempty"`

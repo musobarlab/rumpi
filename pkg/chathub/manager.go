@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/gorilla/websocket"
+	"github.com/musobarlab/rumpi/pkg/jwt"
 )
 
 const (
@@ -24,11 +25,12 @@ type Manager struct {
 	AuthSuccess     chan *Client
 	IncomingMessage chan *Message
 	Upgrader        websocket.Upgrader
+	JwtService      jwt.JwtService
 	sync.RWMutex
 }
 
 // NewManager function
-func NewManager(authKey string) *Manager {
+func NewManager(authKey string, jwtService jwt.JwtService) *Manager {
 	clients := make(map[*Client]bool)
 	incomingMessage := make(chan *Message)
 	register := make(chan *Client)
@@ -50,6 +52,7 @@ func NewManager(authKey string) *Manager {
 		Unregister:      unregister,
 		AuthSuccess:     authSuccess,
 		Upgrader:        upgrader,
+		JwtService:      jwtService,
 	}
 
 }
