@@ -18,13 +18,13 @@ class App extends Component {
         <div>
           <Switch>
             <Route exact path='/'>
-              <Login/>
+              <Login apiBaseUrl={this.props.apiBaseUrl}/>
             </Route>
             <Route exact path='/register'>
-              <Register/>
+              <Register apiBaseUrl={this.props.apiBaseUrl}/>
             </Route>
             <Route path='/chat'>
-              <Chat socketUrl={this.props.socketUrl} authKey={this.props.authKey}/>
+              <Chat socketBaseUrl={this.props.socketBaseUrl} authKey={this.props.authKey}/>
             </Route>
           </Switch>
         </div>
@@ -35,7 +35,8 @@ class App extends Component {
 }
 
 App.defaultProps = {
-  socketUrl: 'ws://localhost:9000/ws'
+  apiBaseUrl: 'http://localhost:9000',
+  socketBaseUrl: 'ws://localhost:9000'
 };
 
 export default App;

@@ -38,7 +38,7 @@ class Login extends Component {
     const {username, password} = this.state;
 
     axios({
-      url: 'http://192.168.100.15:9000/users/login',
+      url: `${this.props.apiBaseUrl}/users/login`,
       method: 'POST',
       headers: { 
         'content-type': 'application/json'

@@ -41,7 +41,7 @@ class Register extends Component {
     const {fullName, email, password} = this.state;
 
     axios({
-      url: 'http://192.168.100.15:9000/users/register',
+      url: `${this.props.apiBaseUrl}/users/register`,
       method: 'POST',
       headers: { 
         'content-type': 'application/json'

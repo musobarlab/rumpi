@@ -54,7 +54,8 @@ class Chat extends Component {
   _connect() {
     const username = localStorage.getItem('username');
     const token = localStorage.getItem('token');
-    let ws = new WebSocket(this.props.socketUrl);
+
+    let ws = new WebSocket(`${this.props.socketBaseUrl}/users/chat`);
 
     ws.onopen = () => {
         console.log("socket opened..");
