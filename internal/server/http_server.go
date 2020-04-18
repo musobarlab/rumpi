@@ -20,6 +20,7 @@ type HTTPServer struct {
 func (s *HTTPServer) Run() error {
 	e := echo.New()
 	e.Use(middleware.Logger())
+	e.Use(middleware.CORSWithConfig(middleware.DefaultCORSConfig))
 	e.GET("/", func(c echo.Context) error {
 		return shared.NewHTTPResponse(http.StatusOK, "server up and running").JSON(c.Response())
 	})
