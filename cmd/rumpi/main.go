@@ -1,64 +1,53 @@
 package main
 
 import (
+	"crypto/sha1"
 	"fmt"
-	"net/http"
+	"log"
 	"os"
 
-	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
 	"github.com/musobarlab/rumpi/config"
+	userDelivery "github.com/musobarlab/rumpi/internal/modules/user/delivery"
+	userDomain "github.com/musobarlab/rumpi/internal/modules/user/domain"
+	userRepo "github.com/musobarlab/rumpi/internal/modules/user/repository"
+	userUc "github.com/musobarlab/rumpi/internal/modules/user/usecase"
+	"github.com/musobarlab/rumpi/internal/server"
 	"github.com/musobarlab/rumpi/pkg/chathub"
+	"github.com/musobarlab/rumpi/pkg/jwt"
+	"github.com/musobarlab/rumpi/pkg/middleware"
+	p "github.com/wuriyanto48/go-pbkdf2"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
-
-func indexHandler(res http.ResponseWriter, req *http.Request) {
-	if req.URL.Path != "/" {
-		http.NotFound(res, req)
-		return
-	}
-	fmt.Fprintf(res, "hell yeah!")
-}
 
 func main() {
 
-	err := config.LoadEnv()
+	err := config.LoadConfig()
 	if err != nil {
 		fmt.Println(err.Error())
 		os.Exit(1)
 	}
 
 	fmt.Println("starting application...")
-	manager := chathub.NewManager(config.Env.WebsocketKey)
+	chatManager := chathub.NewManager(config.Config.WebsocketKey)
 
-	// wsHandler := chathub.Handler{Manager: manager}
+	passwordHasher := p.NewPassword(sha1.New, 8, 32, int(config.Config.PasswordHashIteration))
 
-	// router := mux.NewRouter().StrictSlash(true)
+	jwtService := jwt.NewJWT(config.Config.PublicKey, config.Config.PrivateKey)
 
-	// router.HandleFunc("/", indexHandler).Methods("GET")
-	// router.HandleFunc("/ws", wsHandler.WsHandler)
+	// user module
+	inMemoryDB := make(map[primitive.ObjectID]*userDomain.User)
+	userRepository := userRepo.NewInmemoryRepository(inMemoryDB)
 
-	// // start client manager
-	// go manager.Run()
+	mw := middleware.NewMiddleware()
 
-	// fmt.Println("server running on port 9000")
-	// log.Fatal(http.ListenAndServe(":9000", router))
+	userUsecase := userUc.NewUserUsecaseImpl(userRepository, passwordHasher, jwtService)
+	userEchoDelivery := userDelivery.NewEchoDelivery(userUsecase, mw, chatManager)
 
-	//---------------------------- echo ---------------
-	wsHandler := chathub.EchoHandler{Manager: manager}
+	httpServer := &server.HTTPServer{
+		UserEchoDelivery: userEchoDelivery,
+	}
 
-	e := echo.New()
-	e.Use(middleware.Logger())
-	e.GET("/", func(c echo.Context) error {
-		return c.String(http.StatusOK, "hell yeah")
-	})
+	go chatManager.Run()
 
-	e.POST("/join", func(c echo.Context) error {
-		return c.String(http.StatusOK, "success")
-	})
-
-	e.GET("/ws", wsHandler.WsHandler())
-
-	go manager.Run()
-
-	e.Logger.Fatal(e.Start(fmt.Sprintf(":%d", config.Env.HTTPPort)))
+	log.Fatal(httpServer.Run())
 }
