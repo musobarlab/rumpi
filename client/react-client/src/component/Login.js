@@ -67,10 +67,9 @@ class Login extends Component {
     }).catch((err) => {
       let data = err.response;
       let {messageLogin} = this.state;
-      if (data.data) {
+      messageLogin = 'please try again later';
+      if (data) {
         messageLogin = data.data.message;
-      } else {
-        messageLogin = 'please try again later';
       }
 
       this.setState({username: '', password: ''});

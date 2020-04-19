@@ -69,10 +69,9 @@ class Register extends Component {
     }).catch((err) => {
         let data = err.response;
         let {messageRegister} = this.state;
-        if (data.data) {
+        messageRegister = 'please try again later';
+        if (data) {
             messageRegister = data.data.message;
-        } else {
-            messageRegister = 'please try again later';
         }
 
         this.setState({fullName: '', email: '', password: '', repassword: ''});
