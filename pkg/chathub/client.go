@@ -100,7 +100,7 @@ func (c *Client) Consume() {
 				// this error scope, represent error from token expired or token format error
 				// if error, send message with 'AuthFail' type, to tell client to close its connection
 				// and remove its cookie or localstorage
-				message := &Message{MessageType: AuthFail, Content: jwtClaimResult.Error.Error()}
+				message := &Message{MessageType: AuthFail, Content: jwtClaimResult.Error.Error(), Date: time.Now()}
 				msg, _ := json.Marshal(message)
 
 				c.MsgChan <- msg
