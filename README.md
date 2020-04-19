@@ -22,7 +22,7 @@ $ ./rumpi
 
 # Running Client
 
-## Node Client
+## Node Client `deprecated and not maintained, please use the Reactjs client instead`
 https://github.com/musobarlab/rumpi/tree/master/client/node-client
 ```shell
 $ cd client/node-client
