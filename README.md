@@ -40,6 +40,9 @@ Visit http://localhost:3000
 
 ## Reactjs Client
 https://github.com/musobarlab/rumpi/tree/master/client/react-client
+
+replace this config with your own config
+https://github.com/musobarlab/rumpi/blob/master/client/react-client/src/index.js#L9
 ```shell
 $ cd client/react-client
 $ npm install
