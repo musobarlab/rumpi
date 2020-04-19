@@ -21,7 +21,8 @@ class Register extends Component {
         redirect: false,
         disabledLogout: false,
         disabledSubmit: true,
-        messageRegister: ''
+        messageRegister: '',
+        messageConfirmPassword: ''
     };
 
     this._handleChange = this._handleChange.bind(this);
@@ -94,15 +95,15 @@ class Register extends Component {
     const repassword = target.value;
 
     let disabledSubmit = true;
-    let {password, messageRegister} = this.state;
+    let {password, messageConfirmPassword} = this.state;
     if (password !== repassword) {
-        messageRegister = 'password did not match';
+      messageConfirmPassword = 'password did not match';
     } else {
         disabledSubmit = false;
-        messageRegister = '';
+        messageConfirmPassword = '';
     }
 
-    this.setState({messageRegister: messageRegister, disabledSubmit: disabledSubmit});
+    this.setState({messageConfirmPassword: messageConfirmPassword, disabledSubmit: disabledSubmit});
   }
 
   render() {
@@ -138,11 +139,14 @@ class Register extends Component {
               <Form.Control name="password" type="password" placeholder="Password" value={this.state.password} onChange={this._handleChange} required={true}/>
             </Form.Group>
 
+            <Form.Text className="text-muted">
+                {this.state.messageConfirmPassword}
+            </Form.Text>
             <Form.Group controlId="formConfirmPassword">
               <Form.Label>Confirm Password</Form.Label>
               <Form.Control name="repassword" type="password"
                 onKeyUp={this._handlePasswordConfim}
-                placeholder="Password Confirmation" value={this.state.repassword} required={true}/>
+                placeholder="Password Confirmation" required={true}/>
             </Form.Group>
 
             <Button variant="outline-secondary" type="submit" disabled={this.state.disabledSubmit}>
