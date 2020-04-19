@@ -92,22 +92,29 @@ func (c *Client) Consume() {
 				// auth is invalid, then remove the client that match with its ID
 				c.Conn.Close()
 				c.Manager.DeleteClient(c)
+				break
+			}
+
+			jwtClaimResult := c.Manager.JwtService.Validate(context.Background(), message.Token)
+			if jwtClaimResult.Error != nil {
+				// this error scope, represent error from token expired or token format error
+				// if error, send message with 'AuthFail' type, to tell client to close its connection
+				// and remove its cookie or localstorage
+				message := &Message{MessageType: AuthFail, Content: jwtClaimResult.Error.Error()}
+				msg, _ := json.Marshal(message)
+
+				c.MsgChan <- msg
+
 			} else {
-				jwtClaimResult := c.Manager.JwtService.Validate(context.Background(), message.Token)
-				if jwtClaimResult.Error != nil {
-					c.Conn.Close()
-					c.Manager.DeleteClient(c)
-				} else {
-					jwtClaim := jwtClaimResult.Data.(*jwt.Claim)
-					fmt.Println("-------------------------")
-					fmt.Println(jwtClaim.User.Email)
-					// auth success, send information to AuthSuccess's Manager
-					c.IsOnline = true
-					if message.Username != "" {
-						c.Username = message.Username
-					}
-					c.Manager.AuthSuccess <- c
+				jwtClaim := jwtClaimResult.Data.(*jwt.Claim)
+				fmt.Println("-------------------------")
+				fmt.Println(jwtClaim.User.Email)
+				// auth success, send information to AuthSuccess's Manager
+				c.IsOnline = true
+				if message.Username != "" {
+					c.Username = message.Username
 				}
+				c.Manager.AuthSuccess <- c
 			}
 		}
 

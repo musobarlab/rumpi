@@ -11,6 +11,9 @@ const (
 	// AuthMessage message
 	AuthMessage MessageType = "authMessage"
 
+	// AuthFail message
+	AuthFail MessageType = "authFail"
+
 	// UserJoined message
 	UserJoined MessageType = "userJoined"
 

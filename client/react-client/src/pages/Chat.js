@@ -86,15 +86,29 @@ class Chat extends Component {
     ws.onmessage = (e) => {
         let messageData = e.data;
         let message = JSON.parse(messageData);
-        if (message.messageType === 'usersStatus') {
-          let {onlineUsers} = this.state;
-          console.log(message.onlineUsers);
-          onlineUsers = message.onlineUsers;
-          this.setState({onlineUsers: onlineUsers});
-        } else {
-          let {messages} = this.state;
-          messages.push(message);
-          this.setState({messages: messages});
+
+        switch (message.messageType) {
+          case 'usersStatus':
+            let {onlineUsers} = this.state;
+            onlineUsers = message.onlineUsers;
+
+            this.setState({onlineUsers: onlineUsers});
+            break;
+          case 'authFail':
+            // remove localstorge
+            localStorage.removeItem('username');
+            localStorage.removeItem('token');
+            localStorage.removeItem('expired');
+            console.log('-----------');
+            console.log(message);
+            // set redirect to true
+            this.setState({redirect: true});
+            break;
+          default:
+            let {messages} = this.state;
+            messages.push(message);
+
+            this.setState({messages: messages});
         }
     }
   }
