@@ -155,6 +155,44 @@ class Chat extends Component {
     }
   }
 
+  _renderColumnPeople(props) {
+    return (
+      <Col sm={4}>
+        <h3>People</h3>
+        <ListGroup variant="flush">
+          {
+            props.onlineUsers.map((user, index) => {
+              return <ListGroup.Item key={index}>{user.username}: {(user.status ? 'online' : 'offline')}</ListGroup.Item>
+            })
+          }
+        </ListGroup>
+      </Col>
+    );
+  }
+
+  _renderColumnMessage(props) {
+    return (
+      <Col sm={8}>
+        <h3>Messages</h3>
+        <InputGroup className="mb-3">
+          <FormControl name="to" placeholder="to" aria-label="to" value={props.to} onChange={props._handleChange}/>
+          <FormControl name="message" placeholder="message" aria-label="message" 
+            value={props.message} onChange={props._handleChange} onKeyPress={props._handleKeyEnter}/>
+          <InputGroup.Append>
+            <Button variant="outline-secondary" onClick={props._handleSendMessage} disabled={!props.message}>Send</Button>
+          </InputGroup.Append>
+        </InputGroup>
+        <ListGroup variant="flush">
+          {
+            props.messages.map((message, index) => {
+              return <ListGroup.Item key={index}>{message.from}: {message.content}</ListGroup.Item>
+            })
+          }
+        </ListGroup>
+      </Col>
+    );
+  }
+
   render() {
     const {redirect} = this.state;
 
@@ -169,34 +207,17 @@ class Chat extends Component {
         <Header disabledLogout={this.state.disabledLogout}/>
         <Container>
           <Row>
-            <Col sm={4}>
-              <h3>People</h3>
-              <ListGroup variant="flush">
-                {
-                  this.state.onlineUsers.map((user, index) => {
-                    return <ListGroup.Item key={index}>{user.username}: {(user.status ? 'online' : 'offline')}</ListGroup.Item>
-                  })
-                }
-              </ListGroup>
-            </Col>
-            <Col sm={8}>
-              <h3>Messages</h3>
-              <InputGroup className="mb-3">
-                <FormControl name="to" placeholder="to" aria-label="to" value={this.state.to} onChange={this._handleChange}/>
-                <FormControl name="message" placeholder="message" aria-label="message" 
-                  value={this.state.message} onChange={this._handleChange} onKeyPress={this._handleKeyEnter}/>
-                <InputGroup.Append>
-                  <Button variant="outline-secondary" onClick={this._handleSendMessage} disabled={!this.state.message}>Send</Button>
-                </InputGroup.Append>
-              </InputGroup>
-              <ListGroup variant="flush">
-                {
-                  this.state.messages.map((message, index) => {
-                    return <ListGroup.Item key={index}>{message.from}: {message.content}</ListGroup.Item>
-                  })
-                }
-              </ListGroup>
-            </Col>
+            {this._renderColumnPeople({onlineUsers: this.state.onlineUsers})}
+            {this._renderColumnMessage({
+              to: this.state.to,
+              _handleChange: this._handleChange,
+              _handleKeyEnter: this._handleKeyEnter,
+              _handleSendMessage: this._handleSendMessage,
+              message: this.state.message,
+              messages: this.state.messages,
+
+            })}
+            
           </Row>
         </Container>
       </div>
