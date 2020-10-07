@@ -16,10 +16,10 @@ const (
 	UpdateStatusWait = 2 * time.Second
 )
 
-// Manager model
+// Manager will manage client and chat
 type Manager struct {
 	AuthKey         string
-	Clients         map[*Client]bool
+	Clients         map[string]*Client
 	Register        chan *Client
 	Unregister      chan *Client
 	AuthSuccess     chan *Client
@@ -31,7 +31,7 @@ type Manager struct {
 
 // NewManager function
 func NewManager(authKey string, jwtService jwt.JwtService) *Manager {
-	clients := make(map[*Client]bool)
+	clients := make(map[string]*Client)
 	incomingMessage := make(chan *Message)
 	register := make(chan *Client)
 	unregister := make(chan *Client)
@@ -57,8 +57,8 @@ func NewManager(authKey string, jwtService jwt.JwtService) *Manager {
 
 }
 
-// Run function will run Manager process
-func (manager *Manager) Run() {
+// Handle function will handle incoming client
+func (manager *Manager) Handle() {
 	ticker := time.NewTicker(UpdateStatusWait)
 
 	defer func() {
@@ -70,7 +70,9 @@ func (manager *Manager) Run() {
 		case client := <-manager.AuthSuccess:
 
 			// create room for client using its username
-			client.AddRoom(client.Username)
+			// client.joinRoom(client.Username)
+
+			manager.addClient(client.Username, client)
 
 			message := &Message{
 				From:        client.Username,
@@ -80,24 +82,21 @@ func (manager *Manager) Run() {
 			}
 			manager.send(message, client)
 
-		case client := <-manager.Register:
-			manager.AddClient(client, true)
+		case <-manager.Register:
 
 		case client := <-manager.Unregister:
 
 			// set client online status to false
 			client.IsOnline = false
 
-			if _, ok := manager.Clients[client]; ok {
-				message := &Message{
-					From:        client.Username,
-					MessageType: Broadcast,
-					Date:        time.Now(),
-					Content:     "has leave the chat",
-				}
-				manager.send(message, client)
-				manager.DeleteClient(client)
+			message := &Message{
+				From:        client.Username,
+				MessageType: Broadcast,
+				Date:        time.Now(),
+				Content:     "has leave the chat",
 			}
+			manager.send(message, client)
+			manager.deleteClient(client.Username)
 
 		case m := <-manager.IncomingMessage:
 			for client := range manager.Clients {
@@ -115,8 +114,8 @@ func (manager *Manager) Run() {
 			}
 		case <-ticker.C:
 			var users []*OnlineUser
-			for k, _ := range manager.Clients {
-				users = append(users, &OnlineUser{Username: k.Username, Status: k.IsOnline})
+			for _, client := range manager.Clients {
+				users = append(users, &OnlineUser{Username: client.Username, Status: client.IsOnline})
 			}
 			msg := Message{
 				MessageType: UsersStatus,
@@ -130,13 +129,17 @@ func (manager *Manager) Run() {
 
 func (manager *Manager) send(message *Message, ignore *Client) {
 	msg, _ := json.Marshal(message)
-	for client := range manager.Clients {
+
+	manager.RLock()
+	defer manager.RUnlock()
+
+	for _, client := range manager.Clients {
 		if client != ignore {
 			select {
 			case client.MsgChan <- msg:
 			default:
 				close(client.MsgChan)
-				manager.DeleteClient(client)
+				manager.deleteClient(client.Username)
 			}
 		}
 	}
@@ -144,28 +147,29 @@ func (manager *Manager) send(message *Message, ignore *Client) {
 
 func (manager *Manager) sendPrivate(message *Message) {
 	msg, _ := json.Marshal(message)
-	for client := range manager.Clients {
-		if _, ok := client.Room[message.To]; ok {
-			select {
-			case client.MsgChan <- msg:
-			default:
-				close(client.MsgChan)
-				manager.DeleteClient(client)
-			}
+
+	manager.RLock()
+	defer manager.RUnlock()
+
+	if client, ok := manager.Clients[message.To]; ok {
+		select {
+		case client.MsgChan <- msg:
+		default:
+			close(client.MsgChan)
+			manager.deleteClient(client.Username)
 		}
 	}
 }
 
-//AddClient function will push new client to the map clients
-func (p *Manager) AddClient(key *Client, b bool) {
+//addClient function will push new client to the map clients
+func (p *Manager) addClient(key string, client *Client) {
 	p.Lock()
-	p.Clients[key] = b
+	p.Clients[key] = client
 	p.Unlock()
 }
 
-//DeleteClient function will delete client by specific key from map clients
-func (p *Manager) DeleteClient(key *Client) {
-	close(key.MsgChan)
+//deleteClient function will delete client by specific key from map clients
+func (p *Manager) deleteClient(key string) {
 	p.Lock()
 	delete(p.Clients, key)
 	p.Unlock()

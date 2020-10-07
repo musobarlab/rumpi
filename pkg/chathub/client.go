@@ -28,9 +28,9 @@ const (
 
 // Client model
 type Client struct {
+	*websocket.Conn
 	ID       string
 	Username string
-	Conn     *websocket.Conn
 	MsgChan  chan []byte
 	Manager  *Manager
 	Room     map[string]bool
@@ -38,17 +38,17 @@ type Client struct {
 	sync.RWMutex
 }
 
-//AddRoom function will push new room to the map rooms
-func (client *Client) AddRoom(key string) {
+//joinRoom function will push new room to the map rooms
+func (client *Client) joinRoom(name string) {
 	client.Lock()
-	client.Room[key] = true
+	client.Room[name] = true
 	client.Unlock()
 }
 
-//DeleteRoom function will delete room by specific key from map rooms
-func (client *Client) DeleteRoom(key string) {
+//leaveRoom function will delete room by specific key from map rooms
+func (client *Client) leaveRoom(name string) {
 	client.Lock()
-	delete(client.Room, key)
+	delete(client.Room, name)
 	client.Unlock()
 }
 
@@ -59,23 +59,23 @@ func (c *Client) Consume() {
 	// and also close connection
 	defer func() {
 		c.Manager.Unregister <- c
-		c.Conn.Close()
+		c.Close()
 	}()
 
-	c.Conn.SetReadLimit(MaxMessageSize)
-	c.Conn.SetReadDeadline(time.Now().Add(PongWait))
-	c.Conn.SetPongHandler(func(string) error {
-		c.Conn.SetReadDeadline(time.Now().Add(PongWait))
+	c.SetReadLimit(MaxMessageSize)
+	c.SetReadDeadline(time.Now().Add(PongWait))
+	c.SetPongHandler(func(string) error {
+		c.SetReadDeadline(time.Now().Add(PongWait))
 		return nil
 	})
 
 	for {
 		// read message from client
-		_, msg, err := c.Conn.ReadMessage()
+		_, msg, err := c.ReadMessage()
 		if err != nil {
 
 			c.Manager.Unregister <- c
-			c.Conn.Close()
+			c.Close()
 			break
 		}
 
@@ -83,15 +83,15 @@ func (c *Client) Consume() {
 		err = json.Unmarshal(msg, &message)
 		if err != nil {
 			c.Manager.Unregister <- c
-			c.Conn.Close()
+			c.Close()
 			break
 		}
 
 		if message.MessageType == AuthMessage {
 			if message.AuthKey != c.Manager.AuthKey {
 				// auth is invalid, then remove the client that match with its ID
-				c.Conn.Close()
-				c.Manager.DeleteClient(c)
+				c.Close()
+				c.Manager.deleteClient(c.Username)
 				break
 			}
 
@@ -135,26 +135,26 @@ func (c *Client) Publish() {
 
 	defer func() {
 		ticker.Stop()
-		c.Conn.Close()
+		c.Close()
 	}()
 
 	for {
 		select {
 		case msg, ok := <-c.MsgChan:
-			c.Conn.SetWriteDeadline(time.Now().Add(WriteWait))
+			c.SetWriteDeadline(time.Now().Add(WriteWait))
 			if !ok {
 				// manager closed the send channel.
-				c.Conn.WriteMessage(websocket.CloseMessage, []byte{})
+				c.WriteMessage(websocket.CloseMessage, []byte{})
 				return
 			}
 
 			// write message to connected client
-			// err := c.Conn.WriteMessage(websocket.TextMessage, msg)
+			// err := c.WriteMessage(websocket.TextMessage, msg)
 			// if err != nil {
-			// 	c.Conn.Close()
+			// 	c.Close()
 			// }
 
-			writer, err := c.Conn.NextWriter(websocket.TextMessage)
+			writer, err := c.NextWriter(websocket.TextMessage)
 			if err != nil {
 				return
 			}
@@ -174,8 +174,8 @@ func (c *Client) Publish() {
 			}
 
 		case <-ticker.C:
-			c.Conn.SetWriteDeadline(time.Now().Add(WriteWait))
-			if err := c.Conn.WriteMessage(websocket.PingMessage, nil); err != nil {
+			c.SetWriteDeadline(time.Now().Add(WriteWait))
+			if err := c.WriteMessage(websocket.PingMessage, nil); err != nil {
 				return
 			}
 		}
