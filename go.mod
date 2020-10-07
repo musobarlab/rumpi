@@ -4,6 +4,7 @@ go 1.12
 
 require (
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
+	github.com/go-ldap/ldap/v3 v3.1.8 // indirect
 	github.com/gorilla/mux v1.6.0
 	github.com/gorilla/websocket v1.2.0
 	github.com/joho/godotenv v1.3.0
