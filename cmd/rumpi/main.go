@@ -48,7 +48,7 @@ func main() {
 		UserEchoDelivery: userEchoDelivery,
 	}
 
-	go chatManager.Run()
+	go chatManager.Handle()
 
 	log.Fatal(httpServer.Run())
 }
