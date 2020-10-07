@@ -1,5 +1,6 @@
 import React, {Component} from 'react';
 import {Button,
+  Badge,
   ListGroup,
   Container, 
   Row,
@@ -162,7 +163,7 @@ class Chat extends Component {
         <ListGroup variant="flush">
           {
             props.onlineUsers.map((user, index) => {
-              return <ListGroup.Item key={index}>{user.username}: {(user.status ? 'online' : 'offline')}</ListGroup.Item>
+              return <ListGroup.Item key={index}>{(user.status ? <Badge pill variant="success">.</Badge> : <Badge pill variant="dark">.</Badge>)} {user.username}</ListGroup.Item>
             })
           }
         </ListGroup>
