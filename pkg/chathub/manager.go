@@ -19,9 +19,9 @@ const (
 // Manager will manage client and chat
 type Manager struct {
 	AuthKey         string
-	Clients         map[string]*Client
-	Register        chan *Client
-	Unregister      chan *Client
+	Clients         Clients
+	JoinedClient    chan *Client
+	ExitedClient    chan *Client
 	AuthSuccess     chan *Client
 	IncomingMessage chan *Message
 	Upgrader        websocket.Upgrader
@@ -33,8 +33,8 @@ type Manager struct {
 func NewManager(authKey string, jwtService jwt.JwtService) *Manager {
 	clients := make(map[string]*Client)
 	incomingMessage := make(chan *Message)
-	register := make(chan *Client)
-	unregister := make(chan *Client)
+	joinedClient := make(chan *Client)
+	exitedClient := make(chan *Client)
 	authSuccess := make(chan *Client)
 	upgrader := websocket.Upgrader{
 		ReadBufferSize:  1024,
@@ -48,8 +48,8 @@ func NewManager(authKey string, jwtService jwt.JwtService) *Manager {
 		AuthKey:         authKey,
 		Clients:         clients,
 		IncomingMessage: incomingMessage,
-		Register:        register,
-		Unregister:      unregister,
+		JoinedClient:    joinedClient,
+		ExitedClient:    exitedClient,
 		AuthSuccess:     authSuccess,
 		Upgrader:        upgrader,
 		JwtService:      jwtService,
@@ -82,9 +82,10 @@ func (manager *Manager) Handle() {
 			}
 			manager.send(message, client)
 
-		case <-manager.Register:
+			// just hold the socket connection before validate against JWT validator
+		case <-manager.JoinedClient:
 
-		case client := <-manager.Unregister:
+		case client := <-manager.ExitedClient:
 
 			// set client online status to false
 			client.IsOnline = false
@@ -99,8 +100,9 @@ func (manager *Manager) Handle() {
 			manager.deleteClient(client.Username)
 
 		case m := <-manager.IncomingMessage:
-			for client := range manager.Clients {
-				fmt.Println(client)
+			for _, client := range manager.Clients {
+				fmt.Println("*")
+				fmt.Println(client.ID)
 			}
 
 			switch m.MessageType {

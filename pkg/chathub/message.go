@@ -4,29 +4,6 @@ import (
 	"time"
 )
 
-// MessageType type of message
-type MessageType string
-
-const (
-	// AuthMessage message
-	AuthMessage MessageType = "authMessage"
-
-	// AuthFail message
-	AuthFail MessageType = "authFail"
-
-	// UserJoined message
-	UserJoined MessageType = "userJoined"
-
-	// PrivateMessage message
-	PrivateMessage MessageType = "privateMessage"
-
-	//Broadcast message
-	Broadcast MessageType = "broadcast"
-
-	//UsersStatus message
-	UsersStatus MessageType = "usersStatus"
-)
-
 // OnlineUser represent online user
 type OnlineUser struct {
 	Username string `json:"username,omitempty"`

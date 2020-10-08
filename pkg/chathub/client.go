@@ -11,21 +11,6 @@ import (
 	"github.com/musobarlab/rumpi/pkg/jwt"
 )
 
-const (
-
-	// WriteWait Time allowed to write a message to the peer.
-	WriteWait = 10 * time.Second
-
-	// PongWait Time allowed to read the next pong message from the peer.
-	PongWait = 60 * time.Second
-
-	// PongPeriod should less than PongWait
-	PingPeriod = (PongWait * 9) / 10
-
-	// Maximum message size allowed from peer.
-	MaxMessageSize = 1024
-)
-
 // Client model
 type Client struct {
 	*websocket.Conn
@@ -58,7 +43,7 @@ func (c *Client) Consume() {
 	// if function finish, remove client
 	// and also close connection
 	defer func() {
-		c.Manager.Unregister <- c
+		c.Manager.ExitedClient <- c
 		c.Close()
 	}()
 
@@ -74,7 +59,7 @@ func (c *Client) Consume() {
 		_, msg, err := c.ReadMessage()
 		if err != nil {
 
-			c.Manager.Unregister <- c
+			c.Manager.ExitedClient <- c
 			c.Close()
 			break
 		}
@@ -82,7 +67,7 @@ func (c *Client) Consume() {
 		var message Message
 		err = json.Unmarshal(msg, &message)
 		if err != nil {
-			c.Manager.Unregister <- c
+			c.Manager.ExitedClient <- c
 			c.Close()
 			break
 		}
