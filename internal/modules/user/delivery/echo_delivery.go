@@ -1,6 +1,7 @@
 package delivery
 
 import (
+	"fmt"
 	"net/http"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -109,6 +110,7 @@ func (h *EchoDelivery) chat(c echo.Context) error {
 	}
 
 	id := c.Request().Header.Get("Sec-Websocket-Key")
+	fmt.Println(id)
 
 	var client chathub.Client
 	client.ID = id
@@ -117,7 +119,7 @@ func (h *EchoDelivery) chat(c echo.Context) error {
 	client.Room = make(map[string]bool)
 	client.Manager = h.chatManager
 
-	h.chatManager.Register <- &client
+	h.chatManager.JoinedClient <- &client
 
 	// Consume message
 	go client.Consume()
