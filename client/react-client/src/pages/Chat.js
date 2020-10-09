@@ -44,7 +44,6 @@ class Chat extends Component {
   }
 
   componentWillUnmount() {
-    console.log('componen will unmount');
     const {ws} = this.state;
     if (ws != null) {
       ws.close();
