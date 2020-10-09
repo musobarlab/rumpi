@@ -34,26 +34,32 @@ class Login extends Component {
   }
 
   _handleSubmit(e) {
+    this._loginService();
+    
+    e.preventDefault();
+  }
 
+  async _loginService() {
     const {username, password} = this.state;
 
-    axios({
-      url: `${this.props.apiBaseUrl}/users/login`,
-      method: 'POST',
-      headers: { 
-        'content-type': 'application/json'
-      },
-      data: {
-        'username': username,
-        'password': password
-      },
-      auth: {
-        username: 'user',
-        password: '123456'
-      }
-    }).then((response) => {
-      let data = response.data;
+    try {
+      let response = await axios({
+        url: `${this.props.apiBaseUrl}/users/login`,
+        method: 'POST',
+        headers: { 
+          'content-type': 'application/json'
+        },
+        data: {
+          'username': username,
+          'password': password
+        },
+        auth: {
+          username: 'user',
+          password: '123456'
+        }
+      });
 
+      let data = response.data;
       if (response.status !== 200) {
         let {messageLogin} = this.state;
         messageLogin = data.message
@@ -64,7 +70,7 @@ class Login extends Component {
         localStorage.setItem('expired', data.data.accessTokenExpired);
         this.setState({username: '', password: '', redirect: true});
       }
-    }).catch((err) => {
+    } catch(err){
       let data = err.response;
       let {messageLogin} = this.state;
       messageLogin = 'please try again later';
@@ -74,9 +80,7 @@ class Login extends Component {
 
       this.setState({username: '', password: ''});
       this.setState({messageLogin: messageLogin});
-    });
-
-    e.preventDefault();
+    }
   }
 
   _handleChange(e) {

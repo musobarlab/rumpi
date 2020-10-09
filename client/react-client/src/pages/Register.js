@@ -38,25 +38,31 @@ class Register extends Component {
   }
 
   _handleSubmit(e) {
+    this._registerService();
+    e.preventDefault();
+  }
 
+  async _registerService() {
     const {fullName, email, password} = this.state;
 
-    axios({
-      url: `${this.props.apiBaseUrl}/users/register`,
-      method: 'POST',
-      headers: { 
-        'content-type': 'application/json'
-      },
-      data: {
-        'fullName': fullName,
-        'email': email,
-        'password': password
-      },
-      auth: {
-        username: 'user',
-        password: '123456'
-      }
-    }).then((response) => {
+    try {
+      let response =  await axios({
+        url: `${this.props.apiBaseUrl}/users/register`,
+        method: 'POST',
+        headers: { 
+          'content-type': 'application/json'
+        },
+        data: {
+          'fullName': fullName,
+          'email': email,
+          'password': password
+        },
+        auth: {
+          username: 'user',
+          password: '123456'
+        }
+      });
+
       let data = response.data;
 
       if (response.status !== 201) {
@@ -67,19 +73,18 @@ class Register extends Component {
   
         this.setState({fullName: '', email: '', password: '', repassword: '', redirect: true});
       }
-    }).catch((err) => {
-        let data = err.response;
-        let {messageRegister} = this.state;
-        messageRegister = 'please try again later';
-        if (data) {
-            messageRegister = data.data.message;
-        }
 
-        this.setState({fullName: '', email: '', password: '', repassword: ''});
-        this.setState({messageRegister: messageRegister});
-    });
+    } catch(err) {
+      let data = err.response;
+      let {messageRegister} = this.state;
+      messageRegister = 'please try again later';
+      if (data) {
+          messageRegister = data.data.message;
+      }
 
-    e.preventDefault();
+      this.setState({fullName: '', email: '', password: '', repassword: ''});
+      this.setState({messageRegister: messageRegister});
+    }
   }
 
   _handleChange(e) {
