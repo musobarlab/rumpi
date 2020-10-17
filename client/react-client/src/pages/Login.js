@@ -1,50 +1,39 @@
-import React, {Component} from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Button, 
   Container,
   Form} from 'react-bootstrap';
 
 import axios from 'axios';
-import {Redirect} from 'react-router-dom';
-import Header from './Header';
+import { Redirect } from 'react-router-dom';
+import Header from '../components/Header';
 
-class Login extends Component {
+export default function Login(props) {
 
-  constructor(props) {
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [redirect, setRedirect] = useState(false);
+  const [disabledLogout, setDisabledLogout] = useState(false);
+  const [messageLogin, setMessageLogin] = useState('');
 
-    super(props);
-
-    this.state = {
-      username: '',
-      password: '',
-      redirect: false,
-      disabledLogout: false,
-      messageLogin: ''
-    };
-
-    this._handleChange = this._handleChange.bind(this);
-    this._handleSubmit = this._handleSubmit.bind(this);
-  }
-
-  componentDidMount() {
+  useEffect(() => {
     const username = localStorage.getItem('username');
     if (username == null) {
-      this.setState({disabledLogout: true});
+      setDisabledLogout(true);
     }
-  }
+  }, [disabledLogout]);
 
-  _handleSubmit(e) {
-    this._loginService();
+  const handleSubmit = (e) => {
+    loginService();
     
     e.preventDefault();
-  }
+  };
 
-  async _loginService() {
-    const {username, password} = this.state;
+  const loginService = async () => {
 
     try {
       let response = await axios({
-        url: `${this.props.apiBaseUrl}/users/login`,
+        url: `${props.apiBaseUrl}/users/login`,
         method: 'POST',
         headers: { 
           'content-type': 'application/json'
@@ -61,70 +50,59 @@ class Login extends Component {
 
       let data = response.data;
       if (response.status !== 200) {
-        let {messageLogin} = this.state;
-        messageLogin = data.message
-        this.setState({messageLogin: messageLogin});
+        let _messageLogin = data.message
+        setMessageLogin(_messageLogin);
       } else {
         localStorage.setItem('username', data.data.email.split('@')[0]);
         localStorage.setItem('token', data.data.accessToken);
         localStorage.setItem('expired', data.data.accessTokenExpired);
-        this.setState({username: '', password: '', redirect: true});
+
+        setUsername('');
+        setPassword('');
+        setRedirect(true);
       }
     } catch(err){
       let data = err.response;
-      let {messageLogin} = this.state;
-      messageLogin = 'please try again later';
+      console.log(err);
+      let _messageLogin = 'please try again later';
       if (data) {
-        messageLogin = data.data.message;
+        _messageLogin = data.data.message;
       }
 
-      this.setState({username: '', password: ''});
-      this.setState({messageLogin: messageLogin});
+      setMessageLogin(_messageLogin);
+      setUsername('');
+      setPassword('');
     }
-  }
+  };
 
-  _handleChange(e) {
-    const target = e.target;
-    const value = target.value;
-    const name = target.name;
-
-    this.setState({[name]: value});
-  }
-
-  render() {
-    const {redirect} = this.state;
-
-    if (redirect) {
-      return (
-        <Redirect to='/chat'/>
-      );
-    }
-
+  if (redirect) {
     return (
-      <div>
-        <Header disabledLogout={this.state.disabledLogout}/>
-        <Container>
-          <Form onSubmit={this._handleSubmit}>
-            <Form.Text className="text-muted">
-              {this.state.messageLogin}
-            </Form.Text>
-            <Form.Group controlId="formBasicEmail">
-              <Form.Label>Email address</Form.Label>
-              <Form.Control name="username" type="email" placeholder="Enter email" value={this.state.username} onChange={this._handleChange} required={true}/>
-            </Form.Group>
-
-            <Form.Group controlId="formBasicPassword">
-              <Form.Label>Password</Form.Label>
-              <Form.Control name="password" type="password" placeholder="Password" value={this.state.password} onChange={this._handleChange} required={true}/>
-            </Form.Group>
-            <Button variant="outline-secondary" type="submit">
-              Login
-            </Button>
-          </Form>
-        </Container>
-      </div>
+      <Redirect to='/chat'/>
     );
   }
-}
 
-export default Login;
+  return (
+    <div>
+      <Header disabledLogout={disabledLogout}/>
+      <Container>
+        <Form onSubmit={handleSubmit}>
+          <Form.Text className="text-muted">
+            {messageLogin}
+          </Form.Text>
+          <Form.Group controlId="formBasicEmail">
+            <Form.Label>Email address</Form.Label>
+            <Form.Control name="username" type="email" placeholder="Enter email" value={username} onChange={(e) => setUsername(e.target.value)} required={true}/>
+          </Form.Group>
+
+          <Form.Group controlId="formBasicPassword">
+            <Form.Label>Password</Form.Label>
+            <Form.Control name="password" type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} required={true}/>
+          </Form.Group>
+          <Button variant="outline-secondary" type="submit">
+            Login
+          </Button>
+        </Form>
+      </Container>
+    </div>
+  );
+}

@@ -5,8 +5,8 @@ import {
   Form} from 'react-bootstrap';
 
 import axios from 'axios';
-import {Redirect} from 'react-router-dom';
-import Header from './Header';
+import { Redirect } from 'react-router-dom';
+import Header from '../components/Header';
 
 class Register extends Component {
 

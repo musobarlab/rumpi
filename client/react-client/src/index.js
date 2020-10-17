@@ -6,7 +6,7 @@ import * as serviceWorker from './serviceWorker';
 
 ReactDOM.render(
   <React.StrictMode>
-    <App socketBaseUrl='ws://123.123.40.146:9000' apiBaseUrl='http://123.123.40.146:9000' authKey='555abcd'/>
+    <App socketBaseUrl='ws://localhost:9000' apiBaseUrl='http://localhost:9000' authKey='555abcd'/>
   </React.StrictMode>,
   document.getElementById('root')
 );

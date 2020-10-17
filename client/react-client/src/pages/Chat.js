@@ -9,7 +9,7 @@ import {Button,
   FormControl} from 'react-bootstrap';
 
 import {Redirect} from 'react-router-dom';
-import Header from './Header';
+import Header from '../components/Header';
 
 class Chat extends Component {
 

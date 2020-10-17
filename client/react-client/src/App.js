@@ -1,6 +1,6 @@
-import React, {Component} from 'react';
-import {Chat, Login, Register} from './pages';
-import {Switch, Route, BrowserRouter} from 'react-router-dom';
+import React, { Component } from 'react';
+import { Chat, Login, Register } from './pages';
+import { Switch, Route, BrowserRouter } from 'react-router-dom';
 
 class App extends Component {
   constructor(props) {
