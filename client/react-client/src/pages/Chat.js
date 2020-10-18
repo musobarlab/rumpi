@@ -1,14 +1,14 @@
-import React, {Component} from 'react';
-import {Button,
+import React, { Component } from 'react';
+import { Button,
   Badge,
   ListGroup,
   Container, 
   Row,
   Col, 
   InputGroup, 
-  FormControl} from 'react-bootstrap';
+  FormControl } from 'react-bootstrap';
 
-import {Redirect} from 'react-router-dom';
+import { Redirect } from 'react-router-dom';
 import Header from '../components/Header';
 
 class Chat extends Component {

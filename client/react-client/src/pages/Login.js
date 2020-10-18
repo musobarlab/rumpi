@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import {
-  Button, 
+import { Button, 
   Container,
-  Form} from 'react-bootstrap';
+  Form } from 'react-bootstrap';
 
 import axios from 'axios';
 import { Redirect } from 'react-router-dom';

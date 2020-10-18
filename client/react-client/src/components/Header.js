@@ -3,7 +3,7 @@ import {
     Jumbotron, 
     Container, 
     Nav } from 'react-bootstrap';
-import {Redirect} from 'react-router-dom';
+import { Redirect } from 'react-router-dom';
 
 export default function Header(props) {
     const [redirect, setRedirect] = useState(false);
