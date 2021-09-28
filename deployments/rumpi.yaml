@@ -9,6 +9,7 @@ spec:
     targetPort: 9001
   selector:
     app: rumpi
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -30,6 +31,7 @@ spec:
         imagePullPolicy: always
         ports:
         - containerPort: 9001
+---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:

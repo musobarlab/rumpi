@@ -1,4 +1,6 @@
 # sudo kubectl --kubeconfig /etc/rancher/k3s/k3s.yaml patch deployment ingress-nginx-controller -n ingress-nginx --patch "$(cat ingress.yaml)"
+
+# kubectl scale deployments/ingress-nginx-controller --replicas=0
 spec:
   template:
     spec:
