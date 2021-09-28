@@ -9,7 +9,6 @@ spec:
     targetPort: 9001
   selector:
     app: rumpi
----
 apiVersion: apps/v1
 kind: Deployment
 metadata:
