@@ -1,3 +1,9 @@
+# create
+# sudo kubectl --kubeconfig /etc/rancher/k3s/k3s.yaml apply -f ingress-controller.yaml
+
+# remove
+# sudo kubectl --kubeconfig /etc/rancher/k3s/k3s.yaml delete service ingress-nginx-controller-loadbalancer -n ingress-nginx
+
 apiVersion: v1
 kind: Service
 metadata:

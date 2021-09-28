@@ -40,8 +40,8 @@ metadata:
     nginx.ingress.kubernetes.io/ssl-redirect: "false"
 spec:
   rules:
-  - host: test.w1.thenets.org
-    http:
+  # - host: rumpi.wuriyanto.com
+  - http:
       paths:
         - path: /
           pathType: Prefix
