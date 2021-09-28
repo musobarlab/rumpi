@@ -1,3 +1,4 @@
+# sudo kubectl --kubeconfig /etc/rancher/k3s/k3s.yaml apply -n rumpi-ns -f rumpi.yaml
 apiVersion: v1
 kind: Service
 metadata:
@@ -28,7 +29,6 @@ spec:
       containers:
       - name: rumpi
         image: wuriyanto/rumpi
-        imagePullPolicy: always
         ports:
         - containerPort: 9001
 ---
