@@ -1,0 +1,30 @@
+version: '3' 
+
+services:
+  cloudstorage:
+    # minio set bucket public permission create config with alias $ mc config host add minio-local http://localhost:9000 minion 123456789 
+    # show buckets $ mc ls minio-local set my-bucket-one bucket to public $ mc policy set public minio-local/my-bucket-one
+    image: "minio/minio"
+    command: server /data
+    volumes:
+      - "./volumes/minio:/data"
+    environment:
+      MINIO_ACCESS_KEY: ""
+      MINIO_SECRET_KEY: ""
+    ports:
+      - "9000:9000"
+    networks:
+      - web
+  # redis:
+  #   image: "redis:3.0-alpine"
+  #   command: redis-server --requirepass devpass
+  #   volumes:
+  #     - "./volumes/redis:/data"
+  #   ports:
+  #     - "6379:6379"
+  #   networks:
+  #     - web
+      
+networks:
+  web:
+    driver: bridge
