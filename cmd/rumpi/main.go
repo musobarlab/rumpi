@@ -1,10 +1,12 @@
 package main
 
 import (
+	"context"
 	"crypto/sha1"
 	"fmt"
-	"log"
 	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/musobarlab/rumpi/config"
 	userDelivery "github.com/musobarlab/rumpi/internal/modules/user/delivery"
@@ -29,6 +31,16 @@ func main() {
 
 	fmt.Println("starting application...")
 
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, os.Interrupt, syscall.SIGTERM)
+
+	ctx, cancel := context.WithCancel(context.Background())
+	// ctx, cancel := context.WithTimeout(context.Background(), time.Millisecond*800)
+	defer func() {
+		fmt.Println("ctx canceled")
+		cancel()
+	}()
+
 	passwordHasher := p.NewPassword(sha1.New, 8, 32, int(config.Config.PasswordHashIteration))
 
 	jwtService := jwt.NewJWT(config.Config.PublicKey, config.Config.PrivateKey)
@@ -48,7 +60,10 @@ func main() {
 		UserEchoDelivery: userEchoDelivery,
 	}
 
-	go chatManager.Handle()
+	go chatManager.Handle(ctx)
 
-	log.Fatal(httpServer.Run())
+	go httpServer.Run()
+
+	<-quit
+
 }

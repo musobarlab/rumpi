@@ -1,6 +1,7 @@
 package chathub
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -26,6 +27,7 @@ type Manager struct {
 	IncomingMessage chan *Message
 	Upgrader        websocket.Upgrader
 	JwtService      jwt.JwtService
+	ctx             context.Context
 	sync.RWMutex
 }
 
@@ -58,7 +60,7 @@ func NewManager(authKey string, jwtService jwt.JwtService) *Manager {
 }
 
 // Handle function will handle incoming client
-func (manager *Manager) Handle() {
+func (manager *Manager) Handle(ctx context.Context) {
 	ticker := time.NewTicker(UpdateStatusWait)
 
 	defer func() {
@@ -66,6 +68,19 @@ func (manager *Manager) Handle() {
 	}()
 
 	for {
+
+		// The try-receive operation here is to
+		// try to exit the worker goroutine as
+		// early as possible. Try-receive
+		// optimized by the standard Go
+		// compiler, so they are very efficient.
+		select {
+		case <-ctx.Done():
+			fmt.Printf("manager stopped\n")
+			return
+		default:
+		}
+
 		select {
 		case client := <-manager.AuthSuccess:
 
@@ -125,6 +140,10 @@ func (manager *Manager) Handle() {
 			}
 
 			manager.send(&msg, nil)
+
+		case <-ctx.Done():
+			fmt.Printf("manager stopped\n")
+			return
 		}
 	}
 }
