@@ -135,15 +135,18 @@ func (manager *Manager) send(message *Message, ignore *Client) {
 	manager.RLock()
 	defer manager.RUnlock()
 
+	fmt.Println(manager.Clients)
 	for _, client := range manager.Clients {
-		if client != ignore {
-			select {
-			case client.MsgChan <- msg:
-			default:
+		select {
+		case client.MsgChan <- msg:
+		default:
+			if client == ignore {
 				close(client.MsgChan)
 				manager.deleteClient(client.Username)
 			}
+
 		}
+
 	}
 }
 
@@ -163,14 +166,14 @@ func (manager *Manager) sendPrivate(message *Message) {
 	}
 }
 
-//addClient function will push new client to the map clients
+// addClient function will push new client to the map clients
 func (p *Manager) addClient(key string, client *Client) {
 	p.Lock()
 	p.Clients[key] = client
 	p.Unlock()
 }
 
-//deleteClient function will delete client by specific key from map clients
+// deleteClient function will delete client by specific key from map clients
 func (p *Manager) deleteClient(key string) {
 	p.Lock()
 	delete(p.Clients, key)

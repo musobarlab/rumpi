@@ -110,7 +110,6 @@ func (h *EchoDelivery) chat(c echo.Context) error {
 	}
 
 	id := c.Request().Header.Get("Sec-Websocket-Key")
-	fmt.Println(id)
 
 	var client chathub.Client
 	client.ID = id
@@ -120,12 +119,16 @@ func (h *EchoDelivery) chat(c echo.Context) error {
 	client.Manager = h.chatManager
 
 	h.chatManager.JoinedClient <- &client
+	fmt.Println("after h.chatManager.JoinedClient")
 
 	// Consume message
 	go client.Consume()
-
+	fmt.Println("after consume")
 	// Publish message
 	go client.Publish()
+	fmt.Println("after publish")
+
+	fmt.Println(id)
 
 	return nil
 }

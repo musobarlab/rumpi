@@ -23,14 +23,14 @@ type Client struct {
 	sync.RWMutex
 }
 
-//joinRoom function will push new room to the map rooms
+// joinRoom function will push new room to the map rooms
 func (client *Client) joinRoom(name string) {
 	client.Lock()
 	client.Room[name] = true
 	client.Unlock()
 }
 
-//leaveRoom function will delete room by specific key from map rooms
+// leaveRoom function will delete room by specific key from map rooms
 func (client *Client) leaveRoom(name string) {
 	client.Lock()
 	delete(client.Room, name)
@@ -60,7 +60,7 @@ func (c *Client) Consume() {
 		if err != nil {
 
 			c.Manager.ExitedClient <- c
-			c.Close()
+			// c.Close()
 			break
 		}
 
@@ -68,14 +68,14 @@ func (c *Client) Consume() {
 		err = json.Unmarshal(msg, &message)
 		if err != nil {
 			c.Manager.ExitedClient <- c
-			c.Close()
+			// c.Close()
 			break
 		}
 
 		if message.MessageType == AuthMessage {
 			if message.AuthKey != c.Manager.AuthKey {
 				// auth is invalid, then remove the client that match with its ID
-				c.Close()
+				// c.Close()
 				c.Manager.deleteClient(c.Username)
 				break
 			}
@@ -129,6 +129,7 @@ func (c *Client) Publish() {
 			c.SetWriteDeadline(time.Now().Add(WriteWait))
 			if !ok {
 				// manager closed the send channel.
+				fmt.Println("manager closed the send channel.")
 				c.WriteMessage(websocket.CloseMessage, []byte{})
 				return
 			}
