@@ -1,166 +1,162 @@
-import React, { Component } from 'react';
-import { Button, 
-  Container,
-  Form } from 'react-bootstrap';
-
+import React, { useState, useEffect } from 'react';
+import { Button, Container, Form } from 'react-bootstrap';
 import axios from 'axios';
 import { Redirect } from 'react-router-dom';
 import Header from '../components/Header';
 
-class Register extends Component {
+const Register = (props) => {
+  const [fullName, setFullName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [repassword, setRepassword] = useState('');
+  const [redirect, setRedirect] = useState(false);
+  const [disabledLogout, setDisabledLogout] = useState(false);
+  const [disabledSubmit, setDisabledSubmit] = useState(true);
+  const [messageRegister, setMessageRegister] = useState('');
+  const [messageConfirmPassword, setMessageConfirmPassword] = useState('');
 
-  constructor(props) {
-
-    super(props);
-
-    this.state = {
-        fullName: '',
-        email: '',
-        password: '',
-        redirect: false,
-        disabledLogout: false,
-        disabledSubmit: true,
-        messageRegister: '',
-        messageConfirmPassword: ''
-    };
-
-    this._handleChange = this._handleChange.bind(this);
-    this._handleSubmit = this._handleSubmit.bind(this);
-    this._handlePasswordConfim = this._handlePasswordConfim.bind(this);
-  }
-
-  componentDidMount() {
+  useEffect(() => {
     const username = localStorage.getItem('username');
     if (username == null) {
-        this.setState({disabledLogout: true});
+      setDisabledLogout(true);
     }
-  }
+  }, []);
 
-  _handleSubmit(e) {
-    this._registerService();
+  const _handleSubmit = (e) => {
+    _registerService();
     e.preventDefault();
-  }
+  };
 
-  async _registerService() {
-    const {fullName, email, password} = this.state;
-
+  const _registerService = async () => {
     try {
-      let response =  await axios({
-        url: `${this.props.apiBaseUrl}/users/register`,
+      let response = await axios({
+        url: `${props.apiBaseUrl}/users/register`,
         method: 'POST',
-        headers: { 
-          'content-type': 'application/json'
+        headers: {
+          'content-type': 'application/json',
         },
         data: {
-          'fullName': fullName,
-          'email': email,
-          'password': password
+          fullName: fullName,
+          email: email,
+          password: password,
         },
         auth: {
           username: 'user',
-          password: '123456'
-        }
+          password: '123456',
+        },
       });
 
       let data = response.data;
 
       if (response.status !== 201) {
-        let {messageRegister} = this.state;
-        messageRegister = data.message
-        this.setState({messageRegister: messageRegister});
+        setMessageRegister(data.message);
       } else {
-  
-        this.setState({fullName: '', email: '', password: '', repassword: '', redirect: true});
+        setFullName('');
+        setEmail('');
+        setPassword('');
+        setRepassword('');
+        setRedirect(true);
       }
-
-    } catch(err) {
+    } catch (err) {
       let data = err.response;
-      let {messageRegister} = this.state;
-      messageRegister = 'please try again later';
+      let message = 'please try again later';
       if (data) {
-          messageRegister = data.data.message;
+        message = data.data.message;
       }
-
-      this.setState({fullName: '', email: '', password: '', repassword: ''});
-      this.setState({messageRegister: messageRegister});
+      setFullName('');
+      setEmail('');
+      setPassword('');
+      setRepassword('');
+      setMessageRegister(message);
     }
-  }
+  };
 
-  _handleChange(e) {
-    const target = e.target;
-    const value = target.value;
-    const name = target.name;
+  const _handleChange = (e) => {
+    const { name, value } = e.target;
+    if (name === 'fullName') setFullName(value);
+    else if (name === 'email') setEmail(value);
+    else if (name === 'password') setPassword(value);
+    else if (name === 'repassword') setRepassword(value);
+  };
 
-    this.setState({[name]: value});
-  }
+  const _handlePasswordConfirm = (e) => {
+    const repassword = e.target.value;
 
-  _handlePasswordConfim(e) {
-    const target = e.target;
-    const repassword = target.value;
-
-    let disabledSubmit = true;
-    let {password, messageConfirmPassword} = this.state;
     if (password !== repassword) {
-      messageConfirmPassword = 'password did not match';
+      setMessageConfirmPassword('password did not match');
+      setDisabledSubmit(true);
     } else {
-        disabledSubmit = false;
-        messageConfirmPassword = '';
+      setMessageConfirmPassword('');
+      setDisabledSubmit(false);
     }
+  };
 
-    this.setState({messageConfirmPassword: messageConfirmPassword, disabledSubmit: disabledSubmit});
+  if (redirect) {
+    return <Redirect to='/' />;
   }
 
-  render() {
-    const {redirect} = this.state;
+  return (
+    <div>
+      <Header disabledLogout={disabledLogout} />
+      <Container>
+        <Form onSubmit={_handleSubmit}>
+          <Form.Text className="text-muted">{messageRegister}</Form.Text>
 
-    if (redirect) {
-      return (
-        <Redirect to='/'/>
-      );
-    }
+          <Form.Group controlId="formFullname">
+            <Form.Label>Fullname</Form.Label>
+            <Form.Control
+              name="fullName"
+              type="text"
+              placeholder="Full Name"
+              value={fullName}
+              onChange={_handleChange}
+              required
+            />
+          </Form.Group>
 
-    return (
-      <div>
-        <Header disabledLogout={this.state.disabledLogout}/>
-        <Container>
-          <Form onSubmit={this._handleSubmit}>
-            <Form.Text className="text-muted">
-                {this.state.messageRegister}
-            </Form.Text>
+          <Form.Group controlId="formEmail">
+            <Form.Label>Email address</Form.Label>
+            <Form.Control
+              name="email"
+              type="email"
+              placeholder="Enter email"
+              value={email}
+              onChange={_handleChange}
+              required
+            />
+          </Form.Group>
 
-            <Form.Group controlId="formFullname">
-              <Form.Label>Fullname</Form.Label>
-              <Form.Control name="fullName" type="text" placeholder="Full Name" value={this.state.fullName} onChange={this._handleChange} required={true}/>
-            </Form.Group>
+          <Form.Group controlId="formPassword">
+            <Form.Label>Password</Form.Label>
+            <Form.Control
+              name="password"
+              type="password"
+              placeholder="Password"
+              value={password}
+              onChange={_handleChange}
+              required
+            />
+          </Form.Group>
 
-            <Form.Group controlId="formEmail">
-              <Form.Label>Email address</Form.Label>
-              <Form.Control name="email" type="email" placeholder="Enter email" value={this.state.email} onChange={this._handleChange} required={true}/>
-            </Form.Group>
+          <Form.Text className="text-muted">{messageConfirmPassword}</Form.Text>
+          <Form.Group controlId="formConfirmPassword">
+            <Form.Label>Confirm Password</Form.Label>
+            <Form.Control
+              name="repassword"
+              type="password"
+              onKeyUp={_handlePasswordConfirm}
+              placeholder="Password Confirmation"
+              required
+            />
+          </Form.Group>
 
-            <Form.Group controlId="formPassword">
-              <Form.Label>Password</Form.Label>
-              <Form.Control name="password" type="password" placeholder="Password" value={this.state.password} onChange={this._handleChange} required={true}/>
-            </Form.Group>
-
-            <Form.Text className="text-muted">
-                {this.state.messageConfirmPassword}
-            </Form.Text>
-            <Form.Group controlId="formConfirmPassword">
-              <Form.Label>Confirm Password</Form.Label>
-              <Form.Control name="repassword" type="password"
-                onKeyUp={this._handlePasswordConfim}
-                placeholder="Password Confirmation" required={true}/>
-            </Form.Group>
-
-            <Button variant="outline-secondary" type="submit" disabled={this.state.disabledSubmit}>
-              Register
-            </Button>
-          </Form>
-        </Container>
-      </div>
-    );
-  }
-}
+          <Button variant="outline-secondary" type="submit" disabled={disabledSubmit}>
+            Register
+          </Button>
+        </Form>
+      </Container>
+    </div>
+  );
+};
 
 export default Register;
