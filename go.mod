@@ -6,7 +6,7 @@ require (
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/go-ldap/ldap/v3 v3.1.8 // indirect
 	github.com/gorilla/mux v1.6.0
-	github.com/gorilla/websocket v1.2.0
+	github.com/gorilla/websocket v1.5.3
 	github.com/joho/godotenv v1.3.0
 	github.com/labstack/echo v3.3.10+incompatible
 	github.com/labstack/echo/v4 v4.1.16
