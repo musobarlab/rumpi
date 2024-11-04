@@ -3,7 +3,7 @@ module github.com/musobarlab/rumpi
 go 1.20
 
 require (
-	github.com/golang-jwt/jwt/v4 v4.5.0
+	github.com/golang-jwt/jwt/v4 v4.5.1
 	github.com/gorilla/websocket v1.5.3
 	github.com/joho/godotenv v1.3.0
 	github.com/labstack/echo/v4 v4.1.16
